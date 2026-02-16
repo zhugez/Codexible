@@ -79,7 +79,10 @@ echo ""
 # ==============================
 backup_file() {
   f="$1"
-  [ -f "$f" ] && cp "$f" "\${f}.backup.$(date +%Y%m%d%H%M%S)"
+  if [ -f "$f" ]; then
+    cp "$f" "\${f}.backup.$(date +%Y%m%d%H%M%S)"
+  fi
+  return 0
 }
 
 clean_old_vars() {
