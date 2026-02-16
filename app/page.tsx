@@ -22,11 +22,44 @@ const copy = {
     coreLabel: "Năng lực cốt lõi",
     coreTitle: "Xây cho team ship sản phẩm mỗi ngày",
     pricingLabel: "Bảng giá",
-    pricingTitle: "Gói đơn giản, chi phí dễ đoán",
-    trustLabels: ["Uptime mục tiêu", "Độ trễ route trung bình", "Guardrails & cảnh báo 24/7"],
-    choose: "Chọn",
+    pricingTitle: "Bảng giá đơn giản, minh bạch",
+    pricingSubtitle: "Chọn gói phù hợp nhu cầu mỗi ngày. Có thể nâng cấp bất cứ lúc nào.",
+    pricingNotesTitle: "Lưu ý",
+    pricingNotes: [
+      "Credit được làm mới mỗi ngày.",
+      "Có thể nâng/hạ gói hoặc hủy bất cứ lúc nào.",
+      "Không phí ẩn.",
+    ],
+    mostPopular: "Phổ biến nhất",
     period: "/tháng",
+    plans: [
+      {
+        name: "Starter",
+        price: "10$",
+        description: "Dành cho nhu cầu cơ bản",
+        points: ["75 credit/ngày", "Tạo nội dung nhanh", "Hàng chờ tiêu chuẩn", "Hỗ trợ cộng đồng"],
+        cta: "Bắt đầu với Starter",
+        highlight: false,
+      },
+      {
+        name: "Pro",
+        price: "30$",
+        description: "Dành cho người dùng thường xuyên và team nhỏ",
+        points: ["250 credit/ngày", "Xử lý nhanh hơn", "Hàng chờ ưu tiên", "Hỗ trợ ưu tiên"],
+        cta: "Chọn Pro",
+        highlight: true,
+      },
+      {
+        name: "Business",
+        price: "50$",
+        description: "Dành cho power user và team",
+        points: ["500 credit/ngày", "Tốc độ cao nhất", "Ưu tiên cao nhất", "Hỗ trợ premium"],
+        cta: "Dùng Business",
+        highlight: false,
+      },
+    ],
     install: '$ curl -fsSL "https://codexible.ai/install.sh?key=YOUR_KEY" | sh',
+    trustLabels: ["Uptime mục tiêu", "Độ trễ route trung bình", "Guardrails & cảnh báo 24/7"],
     features: [
       {
         icon: Cpu,
@@ -61,11 +94,40 @@ const copy = {
     coreLabel: "Core capabilities",
     coreTitle: "Built for teams shipping every day",
     pricingLabel: "Pricing",
-    pricingTitle: "Simple plans, predictable spend",
-    trustLabels: ["Gateway uptime target", "Average routing overhead", "24/7 guardrails & alerts"],
-    choose: "Choose",
+    pricingTitle: "Simple, transparent pricing",
+    pricingSubtitle: "Choose the plan that fits your daily workflow. Upgrade anytime.",
+    pricingNotesTitle: "Notes",
+    pricingNotes: ["Credits reset daily.", "Upgrade, downgrade, or cancel anytime.", "No hidden fees."],
+    mostPopular: "Most Popular",
     period: "/month",
+    plans: [
+      {
+        name: "Starter",
+        price: "$10",
+        description: "For light daily usage",
+        points: ["75 credits/day", "Fast generation", "Standard queue", "Community support"],
+        cta: "Start with Starter",
+        highlight: false,
+      },
+      {
+        name: "Pro",
+        price: "$30",
+        description: "For creators and growing teams",
+        points: ["250 credits/day", "Faster processing", "Priority queue", "Priority support"],
+        cta: "Choose Pro",
+        highlight: true,
+      },
+      {
+        name: "Business",
+        price: "$50",
+        description: "For power users and teams",
+        points: ["500 credits/day", "Highest speed", "Top priority queue", "Premium support"],
+        cta: "Go Business",
+        highlight: false,
+      },
+    ],
     install: '$ curl -fsSL "https://codexible.ai/install.sh?key=YOUR_KEY" | sh',
+    trustLabels: ["Gateway uptime target", "Average routing overhead", "24/7 guardrails & alerts"],
     features: [
       {
         icon: Cpu,
@@ -85,25 +147,6 @@ const copy = {
     ],
   },
 } as const;
-
-const plans = [
-  {
-    name: "Starter",
-    price: "299k",
-    points: ["75 credits/day", "1 workspace", "Community support", "Basic analytics"],
-  },
-  {
-    name: "Pro",
-    price: "699k",
-    points: ["220 credits/day", "Team API keys", "Priority queue", "Advanced analytics"],
-    highlight: true,
-  },
-  {
-    name: "Ultra",
-    price: "1.49M",
-    points: ["500 credits/day", "Early model access", "Priority support", "SLA-ready"],
-  },
-];
 
 export default function Home() {
   const [lang, setLang] = useState<Lang>("vi");
@@ -235,10 +278,11 @@ export default function Home() {
         <div className="text-center">
           <p className="text-sm font-semibold uppercase tracking-wider text-[#b86539]">{t.pricingLabel}</p>
           <h2 className="mt-2 text-3xl font-bold text-black md:text-5xl">{t.pricingTitle}</h2>
+          <p className="mx-auto mt-3 max-w-2xl text-sm text-[#667085] md:text-base">{t.pricingSubtitle}</p>
         </div>
 
         <div className="mt-10 grid gap-4 md:grid-cols-3">
-          {plans.map((plan) => (
+          {t.plans.map((plan) => (
             <article
               key={plan.name}
               className={`rounded-2xl border p-6 ${
@@ -247,11 +291,21 @@ export default function Home() {
                   : "border-[#e4e9f0] bg-white shadow-[0_10px_28px_rgba(15,23,42,.05)]"
               }`}
             >
-              <h3 className="text-xl font-bold text-black">{plan.name}</h3>
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-xl font-bold text-black">{plan.name}</h3>
+                {plan.highlight ? (
+                  <span className="rounded-full border border-[#f2d0bf] bg-[#fff3ed] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#b86539]">
+                    {t.mostPopular}
+                  </span>
+                ) : null}
+              </div>
+
               <div className="mt-3 flex items-end gap-1">
                 <span className="text-3xl font-bold text-[#101828]">{plan.price}</span>
                 <span className="pb-1 text-sm text-[#667085]">{t.period}</span>
               </div>
+
+              <p className="mt-2 text-sm text-[#667085]">{plan.description}</p>
 
               <ul className="mt-5 space-y-2">
                 {plan.points.map((point) => (
@@ -268,10 +322,22 @@ export default function Home() {
                   plan.highlight ? "bg-[#e07a45] text-white hover:opacity-90" : "border border-[#d7dee7] hover:bg-[#f8fafc]"
                 }`}
               >
-                {t.choose} {plan.name}
+                {plan.cta}
               </a>
             </article>
           ))}
+        </div>
+
+        <div className="mt-8 rounded-2xl border border-[#e4e9f0] bg-[#fbfdff] p-5 md:p-6">
+          <p className="text-sm font-semibold text-[#111827]">{t.pricingNotesTitle}</p>
+          <ul className="mt-3 space-y-2">
+            {t.pricingNotes.map((note) => (
+              <li key={note} className="flex items-center gap-2 text-sm text-[#475467]">
+                <BadgeCheck className="h-4 w-4 text-[#e07a45]" />
+                {note}
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
