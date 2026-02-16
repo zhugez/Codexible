@@ -99,7 +99,7 @@ export default function Home() {
             </div>
 
             <div className="mt-7 rounded-xl border border-[#e5e7eb] bg-[#0b1020] px-4 py-3 font-mono text-xs text-[#8de0ff] md:text-sm">
-              $ curl -fsSL "https://codexible.ai/install.sh?key=YOUR_KEY" | sh
+              $ curl -fsSL &quot;https://codexible.ai/install.sh?key=YOUR_KEY&quot; | sh
             </div>
           </div>
 
