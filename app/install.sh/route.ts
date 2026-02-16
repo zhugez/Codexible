@@ -56,9 +56,9 @@ fi
 if [ -z "\${API_KEY}" ]; then
   echo "\${RED}Error: API key cannot be empty\${NC}"
   echo "\${YELLOW}Usage:\${NC}"
-  echo "  curl -fsSL 'https://codexible.ai/install.sh?key=YOUR_KEY' | sh"
+  echo "  curl -fsSL 'https://codexible.me/install.sh?key=YOUR_KEY' | sh"
   echo "or"
-  echo "  CODEXIBLE_API_KEY=YOUR_KEY curl -fsSL 'https://codexible.ai/install.sh' | sh"
+  echo "  CODEXIBLE_API_KEY=YOUR_KEY curl -fsSL 'https://codexible.me/install.sh' | sh"
   exit 1
 fi
 
