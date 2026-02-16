@@ -1,20 +1,33 @@
-import { ArrowRight, ChartNoAxesCombined, Cpu, Shield, TerminalSquare } from "lucide-react";
-
 const features = [
   {
-    icon: TerminalSquare,
-    title: "One-line setup",
-    body: "Connect Codex CLI and coding agents in under 30 seconds.",
+    title: "Better, together.",
+    body: "Codexible connects your coding workflows, routing, and cost control in one place.",
+    points: [
+      "One endpoint for all coding tools",
+      "Realtime usage and budget visibility",
+      "Daily credit guardrails",
+      "Fast onboarding for teams",
+    ],
   },
   {
-    icon: Cpu,
-    title: "Smart model routing",
-    body: "Send simple prompts to cheaper models and hard tasks to stronger ones.",
+    title: "Better, together.",
+    body: "Use policy-driven model routing to keep quality high and cost predictable.",
+    points: [
+      "Route simple tasks to cheaper models",
+      "Escalate complex tasks automatically",
+      "Fallback handling and retries",
+      "Provider abstraction for portability",
+    ],
   },
   {
-    icon: ChartNoAxesCombined,
-    title: "Live cost control",
-    body: "Track requests, spend, and credits in real-time across your team.",
+    title: "Better, together.",
+    body: "Built for indie hackers and product teams shipping AI-powered coding features.",
+    points: [
+      "Team key management",
+      "Rate limit and anti-abuse controls",
+      "Clean billing and spend ledger",
+      "Instant production deployment",
+    ],
   },
 ];
 
@@ -22,131 +35,154 @@ const plans = [
   {
     name: "Starter",
     price: "299k VND / month",
-    points: ["75 credits/day", "Realtime dashboard", "Community support"],
+    points: [
+      "75 credits/day",
+      "Unlimited API requests",
+      "Basic dashboard",
+      "Community support",
+      "Single workspace",
+      "Daily reset credits",
+    ],
   },
   {
     name: "Pro",
     price: "699k VND / month",
-    points: ["220 credits/day", "Priority queue", "Team API keys"],
+    points: [
+      "220 credits/day",
+      "Unlimited API requests",
+      "Advanced dashboard",
+      "Team API keys",
+      "Priority queue",
+      "Daily reset credits",
+    ],
   },
   {
     name: "Ultra",
     price: "1.49M VND / month",
-    points: ["500 credits/day", "Early model access", "Priority support"],
+    points: [
+      "500 credits/day",
+      "Unlimited API requests",
+      "Priority support",
+      "Early access models",
+      "SLA-ready operations",
+      "Daily reset credits",
+    ],
   },
 ];
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#05060a] text-white">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(34,211,238,0.18),transparent_35%),radial-gradient(circle_at_85%_10%,rgba(139,92,246,0.15),transparent_30%)]" />
+    <div>
+      <header className="container py-6">
+        <div className="flex items-center justify-between gap-4">
+          <a href="#core" className="text-lg font-bold text-black">Codexible</a>
 
-      <main className="relative mx-auto max-w-6xl px-6 py-10 md:py-14">
-        <header className="mb-12 flex items-center justify-between">
-          <div className="text-lg font-semibold tracking-wide">Codexible</div>
-          <nav className="hidden gap-6 text-sm text-zinc-300 md:flex">
-            <a href="#features" className="hover:text-white">Features</a>
-            <a href="#pricing" className="hover:text-white">Pricing</a>
-            <a href="#customers" className="hover:text-white">Customers</a>
+          <nav className="hidden gap-6 text-sm md:flex">
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#customers">Customers</a>
           </nav>
+
           <a
             href="#pricing"
-            className="rounded-lg border border-white/20 px-4 py-2 text-sm hover:bg-white/10"
+            className="rounded-lg border border-[#cc4b06] bg-[#cc4b06] px-4 py-2 text-sm font-semibold text-white"
           >
             Get started
           </a>
-        </header>
+        </div>
+      </header>
 
-        <section id="core" className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl md:p-14">
-          <h1 className="max-w-4xl text-4xl font-semibold leading-tight md:text-6xl">
-            Automate your coding operations for
-            <span className="block bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-transparent">
-              shipping freedom.
-            </span>
-          </h1>
+      <section id="core" className="container py-16 text-center">
+        <h1 className="mx-auto max-w-4xl text-5xl font-bold leading-tight md:text-7xl">
+          Automate your coding process for creative freedom
+        </h1>
+        <p className="mx-auto mt-6 max-w-2xl text-lg text-[#4b5563] md:text-xl">
+          Codexible gives your team one API layer for routing, metering, and scaling coding agents without losing cost control.
+        </p>
+        <div className="mx-auto mt-8 max-w-[260px]">
+          <a
+            href="#pricing"
+            className="block rounded-lg border border-[#cc4b06] bg-[#cc4b06] px-5 py-3 text-sm font-semibold uppercase tracking-wide text-white"
+          >
+            Start free
+          </a>
+        </div>
+      </section>
 
-          <p className="mt-6 max-w-2xl text-zinc-300 md:text-lg">
-            Codexible is the API infrastructure layer for modern coding agents.
-            One endpoint for routing, metering, and margin-safe scale.
-          </p>
-
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <a
-              href="#pricing"
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 px-6 py-3 text-sm font-semibold text-black hover:opacity-90"
-            >
-              Start free
-              <ArrowRight className="h-4 w-4" />
-            </a>
-            <a
-              href="#features"
-              className="rounded-xl border border-white/20 px-6 py-3 text-sm font-semibold hover:bg-white/10"
-            >
-              See features
-            </a>
-          </div>
-
-          <div className="mt-8 rounded-2xl border border-white/10 bg-black/40 p-4 font-mono text-xs text-cyan-200 md:text-sm">
-            $ curl -fsSL "https://codexible.ai/install.sh?key=YOUR_KEY" | sh
-          </div>
-        </section>
-
-        <section id="features" className="mt-12 grid gap-4 md:grid-cols-3">
-          {features.map(({ icon: Icon, title, body }) => (
-            <article key={title} className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-              <Icon className="mb-3 h-5 w-5 text-cyan-300" />
-              <h3 className="text-lg font-semibold">{title}</h3>
-              <p className="mt-2 text-sm text-zinc-300">{body}</p>
-            </article>
-          ))}
-        </section>
-
-        <section id="pricing" className="mt-12 rounded-3xl border border-white/10 bg-white/[0.03] p-8 md:p-10">
-          <div className="mb-6 inline-flex items-center gap-2 text-sm text-zinc-300">
-            <Shield className="h-4 w-4 text-purple-300" />
-            Choose the right plan
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {plans.map((plan) => (
-              <article key={plan.name} className="rounded-2xl border border-white/10 bg-black/35 p-6">
-                <h3 className="text-xl font-semibold">{plan.name}</h3>
-                <p className="mt-2 text-2xl font-bold text-cyan-300">{plan.price}</p>
-                <ul className="mt-4 space-y-2 text-sm text-zinc-300">
-                  {plan.points.map((point) => (
-                    <li key={point}>• {point}</li>
+      <section id="features" className="bg-[#ecf7f8] py-16">
+        <div className="container">
+          <div className="grid gap-10 md:grid-cols-3">
+            {features.map((item) => (
+              <article key={item.body}>
+                <h3 className="mb-3 text-3xl font-bold">{item.title}</h3>
+                <p className="mb-5 text-base text-[#4b5563]">{item.body}</p>
+                <ul className="space-y-2">
+                  {item.points.map((point) => (
+                    <li key={point} className="text-base">{point}</li>
                   ))}
                 </ul>
               </article>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section id="customers" className="mt-12 rounded-3xl border border-white/10 bg-white/[0.03] p-8 md:p-10">
-          <h3 className="text-2xl font-semibold">Trusted by teams that ship fast</h3>
-          <p className="mt-3 max-w-2xl text-zinc-300">
-            Built for indie hackers, product teams, and AI startups running code generation in production.
+      <section id="pricing" className="container py-16">
+        <h3 className="text-center text-4xl font-bold">Choose the right plan</h3>
+        <p className="mx-auto mt-3 max-w-3xl text-center text-lg text-[#4b5563]">
+          Pricing designed to fit solo builders, startup teams, and high-throughput production workloads.
+        </p>
+
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          {plans.map((plan) => (
+            <article key={plan.name} className="rounded-[20px] border border-[#dde2e5] p-7">
+              <h4 className="text-2xl font-bold">{plan.name}</h4>
+              <p className="mt-2 text-2xl font-bold text-[#cc4b06]">{plan.price}</p>
+
+              <div className="mt-5 space-y-2">
+                {plan.points.map((point) => (
+                  <p key={point} className="text-base text-[#374151]">• {point}</p>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id="customers" className="bg-white py-16 text-center">
+        <div className="container">
+          <h3 className="text-4xl font-bold">Trusted by teams that ship fast</h3>
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-[#4b5563]">
+            Built for developers and product teams running coding workloads in production.
           </p>
 
-          <div className="mt-6 grid gap-4 text-sm md:grid-cols-3">
-            <div className="rounded-xl border border-white/10 bg-black/30 p-4">
-              <p className="text-2xl font-bold text-cyan-300">99.95%</p>
-              <p className="mt-1 text-zinc-300">Gateway uptime target</p>
+          <div className="mx-auto mt-8 grid max-w-4xl gap-4 md:grid-cols-3">
+            <div className="rounded-xl border border-[#e5e7eb] p-5">
+              <p className="text-3xl font-bold">99.95%</p>
+              <p className="mt-2 text-sm text-[#6b7280]">Target uptime</p>
             </div>
-            <div className="rounded-xl border border-white/10 bg-black/30 p-4">
-              <p className="text-2xl font-bold text-cyan-300">&lt; 180ms</p>
-              <p className="mt-1 text-zinc-300">Average routing overhead</p>
+            <div className="rounded-xl border border-[#e5e7eb] p-5">
+              <p className="text-3xl font-bold">&lt; 180ms</p>
+              <p className="mt-2 text-sm text-[#6b7280]">Routing overhead</p>
             </div>
-            <div className="rounded-xl border border-white/10 bg-black/30 p-4">
-              <p className="text-2xl font-bold text-cyan-300">24/7</p>
-              <p className="mt-1 text-zinc-300">Spend guardrails + alerts</p>
+            <div className="rounded-xl border border-[#e5e7eb] p-5">
+              <p className="text-3xl font-bold">24/7</p>
+              <p className="mt-2 text-sm text-[#6b7280]">Spend guardrails</p>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <footer className="mt-12 border-t border-white/10 py-6 text-sm text-zinc-400">
-          © {new Date().getFullYear()} Codexible · One endpoint. Real control.
-        </footer>
-      </main>
+      <footer className="bg-white py-10">
+        <div className="container flex flex-col items-center justify-between gap-4 text-sm md:flex-row">
+          <p>© {new Date().getFullYear()} Codexible</p>
+          <div className="flex items-center gap-5">
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#customers">Customers</a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
