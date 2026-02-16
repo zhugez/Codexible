@@ -58,7 +58,7 @@ const copy = {
         highlight: false,
       },
     ],
-    install: '$ curl -fsSL "https://codexible.ai/install.sh?key=YOUR_KEY" | sh',
+    install: '$ curl -fsSL "https://codexible.me/install.sh?key=YOUR_KEY" | sh',
     trustLabels: ["Uptime mục tiêu", "Độ trễ route trung bình", "Guardrails & cảnh báo 24/7"],
     features: [
       {
@@ -126,7 +126,7 @@ const copy = {
         highlight: false,
       },
     ],
-    install: '$ curl -fsSL "https://codexible.ai/install.sh?key=YOUR_KEY" | sh',
+    install: '$ curl -fsSL "https://codexible.me/install.sh?key=YOUR_KEY" | sh',
     trustLabels: ["Gateway uptime target", "Average routing overhead", "24/7 guardrails & alerts"],
     features: [
       {
