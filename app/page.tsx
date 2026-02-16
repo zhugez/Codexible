@@ -57,7 +57,7 @@ export default function Home() {
 
           <a
             href="#pricing"
-            className="rounded-xl bg-[#cc4b06] px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white transition hover:opacity-90"
+            className="rounded-xl bg-[#e07a45] px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white transition hover:opacity-90"
           >
             Get API Key
           </a>
@@ -67,7 +67,7 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-5 pb-14 pt-12 md:px-6 md:pb-20 md:pt-16">
         <div className="grid items-stretch gap-6 md:grid-cols-[1.2fr_.8fr]">
           <div className="rounded-3xl border border-[#e8ecf1] bg-white p-7 shadow-[0_20px_50px_rgba(15,23,42,.06)] md:p-10">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#f2d0bf] bg-[#fff3ed] px-3 py-1 text-xs font-semibold text-[#a43d0a]">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#f2d0bf] bg-[#fff3ed] px-3 py-1 text-xs font-semibold text-[#b86539]">
               <Zap className="h-3.5 w-3.5" />
               Codex API Infrastructure
             </div>
@@ -75,7 +75,7 @@ export default function Home() {
             <h1 className="mt-5 text-4xl font-bold leading-[1.1] text-black md:text-6xl">
               One endpoint.
               <br />
-              <span className="text-[#cc4b06]">Real control.</span>
+              <span className="text-[#e07a45]">Real control.</span>
             </h1>
 
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-[#475467] md:text-lg">
@@ -85,7 +85,7 @@ export default function Home() {
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <a
                 href="#pricing"
-                className="inline-flex items-center gap-2 rounded-xl bg-[#cc4b06] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#e07a45] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
               >
                 Start free
                 <ArrowRight className="h-4 w-4" />
@@ -120,7 +120,7 @@ export default function Home() {
             </div>
 
             <div className="mt-5 rounded-xl border border-[#f2d0bf] bg-[#fff3ed] p-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#a43d0a]">Status</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#b86539]">Status</p>
               <p className="mt-1 text-sm text-[#7a2e08]">Budget guardrails active • No overspend detected</p>
             </div>
           </div>
@@ -130,14 +130,14 @@ export default function Home() {
       <section id="features" className="bg-[#ecf7f8] py-14 md:py-20">
         <div className="mx-auto max-w-6xl px-5 md:px-6">
           <div className="mb-8 md:mb-10">
-            <p className="text-sm font-semibold uppercase tracking-wider text-[#a43d0a]">Core capabilities</p>
+            <p className="text-sm font-semibold uppercase tracking-wider text-[#b86539]">Core capabilities</p>
             <h2 className="mt-2 text-3xl font-bold text-black md:text-5xl">Built for teams shipping every day</h2>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
             {features.map(({ icon: Icon, title, body }) => (
               <article key={title} className="rounded-2xl border border-[#dbe6e8] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,.06)]">
-                <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#fff3ed] text-[#cc4b06]">
+                <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#fff3ed] text-[#e07a45]">
                   <Icon className="h-5 w-5" />
                 </div>
                 <h3 className="mt-4 text-xl font-bold text-[#101828]">{title}</h3>
@@ -150,7 +150,7 @@ export default function Home() {
 
       <section id="pricing" className="mx-auto max-w-6xl px-5 py-14 md:px-6 md:py-20">
         <div className="text-center">
-          <p className="text-sm font-semibold uppercase tracking-wider text-[#a43d0a]">Pricing</p>
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#b86539]">Pricing</p>
           <h2 className="mt-2 text-3xl font-bold text-black md:text-5xl">Simple plans, predictable spend</h2>
         </div>
 
@@ -160,7 +160,7 @@ export default function Home() {
               key={plan.name}
               className={`rounded-2xl border p-6 ${
                 plan.highlight
-                  ? "border-[#cc4b06] bg-[#fffaf7] shadow-[0_16px_40px_rgba(204,75,6,.15)]"
+                  ? "border-[#e07a45] bg-[#fffaf7] shadow-[0_16px_40px_rgba(224,122,69,.14)]"
                   : "border-[#e4e9f0] bg-white shadow-[0_10px_28px_rgba(15,23,42,.05)]"
               }`}
             >
@@ -173,7 +173,7 @@ export default function Home() {
               <ul className="mt-5 space-y-2">
                 {plan.points.map((point) => (
                   <li key={point} className="flex items-center gap-2 text-sm text-[#344054]">
-                    <BadgeCheck className="h-4 w-4 text-[#cc4b06]" />
+                    <BadgeCheck className="h-4 w-4 text-[#e07a45]" />
                     {point}
                   </li>
                 ))}
@@ -182,7 +182,7 @@ export default function Home() {
               <a
                 href="#"
                 className={`mt-6 inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
-                  plan.highlight ? "bg-[#cc4b06] text-white hover:opacity-90" : "border border-[#d7dee7] hover:bg-[#f8fafc]"
+                  plan.highlight ? "bg-[#e07a45] text-white hover:opacity-90" : "border border-[#d7dee7] hover:bg-[#f8fafc]"
                 }`}
               >
                 Choose {plan.name}

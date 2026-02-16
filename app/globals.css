@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --accent: #cc4b06;
+  --accent: #e07a45;
   --dark: #000;
   --tenary: #ecf7f8;
   --base-font: var(--font-manrope), "Manrope", sans-serif;
