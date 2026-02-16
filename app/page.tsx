@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 import { ArrowRight, BadgeCheck, BarChart3, Cpu, ShieldCheck, Zap } from "lucide-react";
 
@@ -111,12 +110,11 @@ export default function Home() {
   const t = copy[lang];
 
   return (
-    <div className="text-[var(--text-main)]">
+    <div className="text-[#141414]">
       <header className="sticky top-0 z-50 border-b border-black/5 bg-white/85 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 md:px-6">
-          <a href="#" className="flex items-center gap-2 text-lg font-bold tracking-tight text-black">
-            <Image src="/brand/vector/isolated-monochrome-black.svg" alt="Codexible" width={24} height={24} className="h-6 w-6" />
-            <span>Codexible</span>
+          <a href="#" className="text-lg font-bold tracking-tight text-black">
+            Codexible
           </a>
 
           <nav className="hidden items-center gap-7 text-sm text-[#475467] md:flex">
@@ -129,13 +127,13 @@ export default function Home() {
             <div className="flex rounded-lg border border-[#d7dee7] bg-white p-0.5">
               <button
                 onClick={() => setLang("vi")}
-                className={`rounded-md px-2.5 py-1 text-xs font-semibold ${lang === "vi" ? "bg-[var(--accent)] text-white" : "text-[#667085]"}`}
+                className={`rounded-md px-2.5 py-1 text-xs font-semibold ${lang === "vi" ? "bg-[#e07a45] text-white" : "text-[#667085]"}`}
               >
                 VI
               </button>
               <button
                 onClick={() => setLang("en")}
-                className={`rounded-md px-2.5 py-1 text-xs font-semibold ${lang === "en" ? "bg-[var(--accent)] text-white" : "text-[#667085]"}`}
+                className={`rounded-md px-2.5 py-1 text-xs font-semibold ${lang === "en" ? "bg-[#e07a45] text-white" : "text-[#667085]"}`}
               >
                 EN
               </button>
@@ -143,7 +141,7 @@ export default function Home() {
 
             <a
               href="#pricing"
-              className="rounded-xl bg-[var(--accent)] px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white transition hover:opacity-90"
+              className="rounded-xl bg-[#e07a45] px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white transition hover:opacity-90"
             >
               {t.ctaTop}
             </a>
@@ -152,19 +150,9 @@ export default function Home() {
       </header>
 
       <section className="mx-auto max-w-6xl px-5 pb-14 pt-12 md:px-6 md:pb-20 md:pt-16">
-        <div className="mb-6 overflow-hidden rounded-2xl border border-black/5">
-          <Image
-            src="/brand/cover.png"
-            alt="Codexible brand cover"
-            width={3500}
-            height={1440}
-            className="h-auto w-full object-cover"
-            priority
-          />
-        </div>
         <div className="grid items-stretch gap-6 md:grid-cols-[1.2fr_.8fr]">
           <div className="rounded-3xl border border-[#e8ecf1] bg-white p-7 shadow-[0_20px_50px_rgba(15,23,42,.06)] md:p-10">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(0,238,225,.28)] bg-[#f7fffe] px-3 py-1 text-xs font-semibold text-[var(--text-main)]">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#f2d0bf] bg-[#fff3ed] px-3 py-1 text-xs font-semibold text-[#b86539]">
               <Zap className="h-3.5 w-3.5" />
               {t.badge}
             </div>
@@ -172,7 +160,7 @@ export default function Home() {
             <h1 className="mt-5 text-4xl font-bold leading-[1.1] text-black md:text-6xl">
               {t.heroTitleA}
               <br />
-              <span className="text-[var(--accent)]">{t.heroTitleB}</span>
+              <span className="text-[#e07a45]">{t.heroTitleB}</span>
             </h1>
 
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-[#475467] md:text-lg">{t.heroDesc}</p>
@@ -180,7 +168,7 @@ export default function Home() {
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <a
                 href="#pricing"
-                className="inline-flex items-center gap-2 rounded-xl bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#e07a45] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
               >
                 {t.heroStart}
                 <ArrowRight className="h-4 w-4" />
@@ -214,9 +202,9 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="mt-5 rounded-xl border border-[rgba(0,238,225,.28)] bg-[#f7fffe] p-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-main)]">{t.statusTitle}</p>
-              <p className="mt-1 text-sm text-[var(--slogan)]">{t.statusBody}</p>
+            <div className="mt-5 rounded-xl border border-[#f2d0bf] bg-[#fff3ed] p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#b86539]">{t.statusTitle}</p>
+              <p className="mt-1 text-sm text-[#7a2e08]">{t.statusBody}</p>
             </div>
           </div>
         </div>
@@ -225,14 +213,14 @@ export default function Home() {
       <section id="features" className="bg-[#ecf7f8] py-14 md:py-20">
         <div className="mx-auto max-w-6xl px-5 md:px-6">
           <div className="mb-8 md:mb-10">
-            <p className="text-sm font-semibold uppercase tracking-wider text-[var(--text-main)]">{t.coreLabel}</p>
+            <p className="text-sm font-semibold uppercase tracking-wider text-[#b86539]">{t.coreLabel}</p>
             <h2 className="mt-2 text-3xl font-bold text-black md:text-5xl">{t.coreTitle}</h2>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
             {t.features.map(({ icon: Icon, title, body }) => (
               <article key={title} className="rounded-2xl border border-[#dbe6e8] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,.06)]">
-                <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#f7fffe] text-[var(--accent)]">
+                <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#fff3ed] text-[#e07a45]">
                   <Icon className="h-5 w-5" />
                 </div>
                 <h3 className="mt-4 text-xl font-bold text-[#101828]">{title}</h3>
@@ -245,7 +233,7 @@ export default function Home() {
 
       <section id="pricing" className="mx-auto max-w-6xl px-5 py-14 md:px-6 md:py-20">
         <div className="text-center">
-          <p className="text-sm font-semibold uppercase tracking-wider text-[var(--text-main)]">{t.pricingLabel}</p>
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#b86539]">{t.pricingLabel}</p>
           <h2 className="mt-2 text-3xl font-bold text-black md:text-5xl">{t.pricingTitle}</h2>
         </div>
 
@@ -255,7 +243,7 @@ export default function Home() {
               key={plan.name}
               className={`rounded-2xl border p-6 ${
                 plan.highlight
-                  ? "border-[var(--accent)] bg-[#fffaf7] shadow-[0_16px_40px_rgba(224,122,69,.14)]"
+                  ? "border-[#e07a45] bg-[#fffaf7] shadow-[0_16px_40px_rgba(224,122,69,.14)]"
                   : "border-[#e4e9f0] bg-white shadow-[0_10px_28px_rgba(15,23,42,.05)]"
               }`}
             >
@@ -268,7 +256,7 @@ export default function Home() {
               <ul className="mt-5 space-y-2">
                 {plan.points.map((point) => (
                   <li key={point} className="flex items-center gap-2 text-sm text-[#344054]">
-                    <BadgeCheck className="h-4 w-4 text-[var(--accent)]" />
+                    <BadgeCheck className="h-4 w-4 text-[#e07a45]" />
                     {point}
                   </li>
                 ))}
@@ -277,7 +265,7 @@ export default function Home() {
               <a
                 href="#"
                 className={`mt-6 inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
-                  plan.highlight ? "bg-[var(--accent)] text-white hover:opacity-90" : "border border-[#d7dee7] hover:bg-[#f8fafc]"
+                  plan.highlight ? "bg-[#e07a45] text-white hover:opacity-90" : "border border-[#d7dee7] hover:bg-[#f8fafc]"
                 }`}
               >
                 {t.choose} {plan.name}
