@@ -4,124 +4,167 @@ function escapeSingleQuotes(input: string) {
   return input.replace(/'/g, "'\\''");
 }
 
-function buildScript(defaultKey: string, defaultBaseUrl: string) {
+function buildScript(defaultKey: string, defaultEndpoint: string) {
   const safeKey = escapeSingleQuotes(defaultKey);
-  const safeBase = escapeSingleQuotes(defaultBaseUrl);
+  const safeEndpoint = escapeSingleQuotes(defaultEndpoint);
 
-  return `#!/usr/bin/env bash
-set -euo pipefail
+  return `#!/usr/bin/env sh
 
-DEFAULT_KEY='${safeKey}'
-DEFAULT_BASE_URL='${safeBase}'
+# ==========================================
+#        Codexible Installer
+# Configure Codexible environment
+# ==========================================
 
-KEY="\${1:-\${CODEXIBLE_API_KEY:-\${DEFAULT_KEY}}}"
-BASE_URL="\${CODEXIBLE_BASE_URL:-\${DEFAULT_BASE_URL}}"
+set -e
 
-if [[ -z "\${KEY}" ]]; then
-  echo "[codexible] Missing API key."
-  echo "Usage:"
-  echo "  curl -fsSL 'https://codexible.ai/install.sh?key=YOUR_KEY' | bash"
+# ==============================
+# Configuration
+# ==============================
+
+ENDPOINT_URL='${safeEndpoint}'
+DEFAULT_API_KEY='${safeKey}'
+
+# Default Models
+PRIMARY_MODEL="gpt-5.3-codex"
+FALLBACK_MODEL1="gpt-5.2-codex"
+FALLBACK_MODEL2="kimi-k2.5"
+
+# ==============================
+# Colors
+# ==============================
+RED=$(printf '\\033[0;31m')
+GREEN=$(printf '\\033[0;32m')
+YELLOW=$(printf '\\033[1;33m')
+BLUE=$(printf '\\033[0;34m')
+NC=$(printf '\\033[0m')
+
+echo "\${BLUE}================================\${NC}"
+echo "\${BLUE}       Codexible Installer\${NC}"
+echo "\${BLUE}================================\${NC}"
+echo ""
+
+# ==============================
+# API Key Input
+# ==============================
+API_KEY="\${1:-\${CODEXIBLE_API_KEY:-\${DEFAULT_API_KEY}}}"
+
+if [ -z "\${API_KEY}" ] && [ -r /dev/tty ]; then
+  printf "Enter your Codexible API Key: " > /dev/tty
+  IFS= read -r API_KEY < /dev/tty || true
+fi
+
+if [ -z "\${API_KEY}" ]; then
+  echo "\${RED}Error: API key cannot be empty\${NC}"
+  echo "\${YELLOW}Usage:\${NC}"
+  echo "  curl -fsSL 'https://codexible.ai/install.sh?key=YOUR_KEY' | sh"
   echo "or"
-  echo "  CODEXIBLE_API_KEY=YOUR_KEY curl -fsSL 'https://codexible.ai/install.sh' | bash"
+  echo "  CODEXIBLE_API_KEY=YOUR_KEY curl -fsSL 'https://codexible.ai/install.sh' | sh"
   exit 1
 fi
 
-CONFIG_DIR="\${XDG_CONFIG_HOME:-\${HOME}/.config}/codexible"
-CONFIG_FILE="\${CONFIG_DIR}/config"
-BIN_DIR="\${HOME}/.local/bin"
-BIN_FILE="\${BIN_DIR}/codexible"
+MASKED_KEY=$(printf "%s" "\${API_KEY}" | cut -c 1-8)
 
-mkdir -p "\${CONFIG_DIR}" "\${BIN_DIR}"
+echo ""
+echo "Endpoint: \${GREEN}\${ENDPOINT_URL}\${NC}"
+echo "API Key:  \${GREEN}\${MASKED_KEY}...\${NC}"
+echo ""
+echo "Using Models:"
+echo "  Primary  : \${GREEN}\${PRIMARY_MODEL}\${NC}"
+echo "  Fallback1: \${GREEN}\${FALLBACK_MODEL1}\${NC}"
+echo "  Fallback2: \${GREEN}\${FALLBACK_MODEL2}\${NC}"
+echo ""
 
-cat > "\${CONFIG_FILE}" <<EOF
-CODEXIBLE_API_KEY="\${KEY}"
-CODEXIBLE_BASE_URL="\${BASE_URL}"
-EOF
+# ==============================
+# Backup + config helpers
+# ==============================
+backup_file() {
+  f="$1"
+  [ -f "$f" ] && cp "$f" "\${f}.backup.$(date +%Y%m%d%H%M%S)"
+}
 
-cat > "\${BIN_FILE}" <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
+clean_old_vars() {
+  f="$1"
+  if [ -f "$f" ]; then
+    sed '/^export CODEXIBLE_/d' "$f" > "\${f}.tmp"
+    mv "\${f}.tmp" "$f"
+  fi
+}
 
-CONFIG_FILE="\${XDG_CONFIG_HOME:-\${HOME}/.config}/codexible/config"
-if [[ -f "\${CONFIG_FILE}" ]]; then
-  # shellcheck disable=SC1090
-  source "\${CONFIG_FILE}"
+add_env_vars() {
+  f="$1"
+  clean_old_vars "$f"
+  echo "" >> "$f"
+  echo "# Codexible configuration" >> "$f"
+  echo "export CODEXIBLE_BASE_URL=\"\${ENDPOINT_URL}\"" >> "$f"
+  echo "export CODEXIBLE_API_KEY=\"\${API_KEY}\"" >> "$f"
+  echo "export CODEXIBLE_MODEL_PRIMARY=\"\${PRIMARY_MODEL}\"" >> "$f"
+  echo "export CODEXIBLE_MODEL_FALLBACK1=\"\${FALLBACK_MODEL1}\"" >> "$f"
+  echo "export CODEXIBLE_MODEL_FALLBACK2=\"\${FALLBACK_MODEL2}\"" >> "$f"
+}
+
+# ==============================
+# Update Shell Config
+# ==============================
+echo "\${BLUE}Configuring shell...\${NC}"
+
+if [ -f "$HOME/.bashrc" ]; then
+  backup_file "$HOME/.bashrc"
+  add_env_vars "$HOME/.bashrc"
+  echo "  \${GREEN}Updated .bashrc\${NC}"
 fi
 
-CMD="\${1:-help}"
-shift || true
-
-case "\${CMD}" in
-  env)
-    echo "CODEXIBLE_BASE_URL=\${CODEXIBLE_BASE_URL:-https://api.codexible.ai/v1}"
-    if [[ -n "\${CODEXIBLE_API_KEY:-}" ]]; then
-      echo "CODEXIBLE_API_KEY=***configured***"
-    else
-      echo "CODEXIBLE_API_KEY=missing"
-    fi
-    ;;
-
-  curl)
-    if [[ -z "\${CODEXIBLE_API_KEY:-}" ]]; then
-      echo "[codexible] Missing CODEXIBLE_API_KEY. Run installer again."
-      exit 1
-    fi
-
-    PATH_SUFFIX="\${1:-/health}"
-    shift || true
-
-    if [[ "\${PATH_SUFFIX}" != /* ]]; then
-      PATH_SUFFIX="/\${PATH_SUFFIX}"
-    fi
-
-    exec curl -fsSL \
-      -H "Authorization: Bearer \${CODEXIBLE_API_KEY}" \
-      "\${CODEXIBLE_BASE_URL:-https://api.codexible.ai/v1}\${PATH_SUFFIX}" \
-      "$@"
-    ;;
-
-  help|*)
-    cat <<HELP
-codexible CLI
-
-Usage:
-  codexible env
-  codexible curl /health
-  codexible curl /v1/models
-
-Notes:
-  - Config file: \${CONFIG_FILE}
-  - Auth header: Authorization: Bearer <CODEXIBLE_API_KEY>
-HELP
-    ;;
-esac
-EOF
-
-chmod +x "\${BIN_FILE}"
-
-echo "[codexible] Installed ✅"
-echo "[codexible] Config: \${CONFIG_FILE}"
-echo "[codexible] Binary: \${BIN_FILE}"
-
-echo
-if [[ ":\${PATH}:" != *":\${BIN_DIR}:"* ]]; then
-  echo "Add this to your shell profile if needed:"
-  echo "  export PATH=\"\${BIN_DIR}:\$PATH\""
-  echo
+if [ -f "$HOME/.zshrc" ]; then
+  backup_file "$HOME/.zshrc"
+  add_env_vars "$HOME/.zshrc"
+  echo "  \${GREEN}Updated .zshrc\${NC}"
 fi
 
-echo "Quick test:"
-echo "  codexible env"
-echo "  codexible curl /health"
+# ==============================
+# Update settings.json
+# ==============================
+echo ""
+echo "\${BLUE}Updating Codexible settings...\${NC}"
+
+SETTINGS="$HOME/.codexible/settings.json"
+mkdir -p "$(dirname "$SETTINGS")"
+backup_file "$SETTINGS"
+
+cat > "$SETTINGS" <<EOF
+{
+  "endpoint": "\${ENDPOINT_URL}",
+  "api_key": "\${API_KEY}",
+  "models": {
+    "primary": "\${PRIMARY_MODEL}",
+    "fallback1": "\${FALLBACK_MODEL1}",
+    "fallback2": "\${FALLBACK_MODEL2}"
+  },
+  "disableLoginPrompt": true
+}
+EOF
+
+echo "  \${GREEN}settings.json updated\${NC}"
+
+# ==============================
+# Done
+# ==============================
+echo ""
+echo "\${GREEN}================================\${NC}"
+echo "\${GREEN}    Codexible Setup Complete\${NC}"
+echo "\${GREEN}================================\${NC}"
+echo ""
+echo "Restart your terminal or run:"
+echo "  \${BLUE}source ~/.bashrc\${NC}"
+echo ""
+echo "Then use Codexible CLI normally."
 `;
 }
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const key = searchParams.get("key") ?? "";
-  const base = searchParams.get("base") ?? "https://api.codexible.ai/v1";
+  const endpoint = searchParams.get("endpoint") ?? "https://codexible.me";
 
-  const script = buildScript(key, base);
+  const script = buildScript(key, endpoint);
 
   return new NextResponse(script, {
     status: 200,
