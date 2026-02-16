@@ -1,206 +1,219 @@
+import { ArrowRight, BadgeCheck, BarChart3, Cpu, ShieldCheck, Zap } from "lucide-react";
+
 const features = [
   {
-    title: "Better, together.",
-    body: "Codexible connects your coding workflows, routing, and cost control in one place.",
-    points: [
-      "One endpoint for all coding tools",
-      "Realtime usage and budget visibility",
-      "Daily credit guardrails",
-      "Fast onboarding for teams",
-    ],
+    icon: Cpu,
+    title: "Smart Routing Engine",
+    body: "Tự động route prompt theo policy để cân bằng quality và cost theo thời gian thực.",
   },
   {
-    title: "Better, together.",
-    body: "Use policy-driven model routing to keep quality high and cost predictable.",
-    points: [
-      "Route simple tasks to cheaper models",
-      "Escalate complex tasks automatically",
-      "Fallback handling and retries",
-      "Provider abstraction for portability",
-    ],
+    icon: BarChart3,
+    title: "Live Cost Control",
+    body: "Theo dõi token, request, burn-rate theo user/team với cảnh báo vượt ngân sách.",
   },
   {
-    title: "Better, together.",
-    body: "Built for indie hackers and product teams shipping AI-powered coding features.",
-    points: [
-      "Team key management",
-      "Rate limit and anti-abuse controls",
-      "Clean billing and spend ledger",
-      "Instant production deployment",
-    ],
+    icon: ShieldCheck,
+    title: "Margin Guardrails",
+    body: "Rate limit, quota và hard cap để không bị lỗ khi workload tăng đột biến.",
   },
 ];
 
 const plans = [
   {
     name: "Starter",
-    price: "299k VND / month",
-    points: [
-      "75 credits/day",
-      "Unlimited API requests",
-      "Basic dashboard",
-      "Community support",
-      "Single workspace",
-      "Daily reset credits",
-    ],
+    price: "299k",
+    period: "/month",
+    points: ["75 credits/day", "1 workspace", "Community support", "Basic analytics"],
   },
   {
     name: "Pro",
-    price: "699k VND / month",
-    points: [
-      "220 credits/day",
-      "Unlimited API requests",
-      "Advanced dashboard",
-      "Team API keys",
-      "Priority queue",
-      "Daily reset credits",
-    ],
+    price: "699k",
+    period: "/month",
+    points: ["220 credits/day", "Team API keys", "Priority queue", "Advanced analytics"],
+    highlight: true,
   },
   {
     name: "Ultra",
-    price: "1.49M VND / month",
-    points: [
-      "500 credits/day",
-      "Unlimited API requests",
-      "Priority support",
-      "Early access models",
-      "SLA-ready operations",
-      "Daily reset credits",
-    ],
+    price: "1.49M",
+    period: "/month",
+    points: ["500 credits/day", "Early model access", "Priority support", "SLA-ready"],
   },
 ];
 
 export default function Home() {
   return (
-    <div className="text-[#222]">
-      <header className="sticky top-0 z-40 border-b border-[#e7ebef]/70 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
-          <a href="#core" className="text-lg font-bold tracking-tight text-black">
+    <div className="text-[#141414]">
+      <header className="sticky top-0 z-50 border-b border-black/5 bg-white/85 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 md:px-6">
+          <a href="#" className="text-lg font-bold tracking-tight text-black">
             Codexible
           </a>
 
-          <nav className="hidden items-center gap-7 text-sm font-medium md:flex">
-            <a href="#features" className="text-[#3f4b59] hover:text-black">Features</a>
-            <a href="#pricing" className="text-[#3f4b59] hover:text-black">Pricing</a>
-            <a href="#customers" className="text-[#3f4b59] hover:text-black">Customers</a>
+          <nav className="hidden items-center gap-7 text-sm text-[#475467] md:flex">
+            <a href="#features" className="hover:text-black">Features</a>
+            <a href="#pricing" className="hover:text-black">Pricing</a>
+            <a href="#trust" className="hover:text-black">Trust</a>
           </nav>
 
           <a
             href="#pricing"
-            className="rounded-lg bg-[#cc4b06] px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white hover:opacity-90"
+            className="rounded-xl bg-[#cc4b06] px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white transition hover:opacity-90"
           >
-            Get started
+            Get API Key
           </a>
         </div>
       </header>
 
-      <section id="core" className="mx-auto w-full max-w-6xl px-6 pb-16 pt-14 text-center md:pb-20 md:pt-20">
-        <h1 className="mx-auto max-w-4xl text-4xl font-bold leading-tight text-black md:text-6xl md:leading-[1.12]">
-          Automate your coding process
-          <br className="hidden md:block" /> for creative freedom
-        </h1>
+      <section className="mx-auto max-w-6xl px-5 pb-14 pt-12 md:px-6 md:pb-20 md:pt-16">
+        <div className="grid items-stretch gap-6 md:grid-cols-[1.2fr_.8fr]">
+          <div className="rounded-3xl border border-[#e8ecf1] bg-white p-7 shadow-[0_20px_50px_rgba(15,23,42,.06)] md:p-10">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#f2d0bf] bg-[#fff3ed] px-3 py-1 text-xs font-semibold text-[#a43d0a]">
+              <Zap className="h-3.5 w-3.5" />
+              Codex API Infrastructure
+            </div>
 
-        <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-[#4b5563] md:text-xl">
-          Codexible gives your team one API layer for routing, metering, and scaling coding agents without losing cost control.
-        </p>
+            <h1 className="mt-5 text-4xl font-bold leading-[1.1] text-black md:text-6xl">
+              One endpoint.
+              <br />
+              <span className="text-[#cc4b06]">Real control.</span>
+            </h1>
 
-        <div className="mt-8 flex items-center justify-center gap-3">
-          <a
-            href="#pricing"
-            className="rounded-lg bg-[#cc4b06] px-5 py-3 text-sm font-semibold uppercase tracking-wide text-white hover:opacity-90"
-          >
-            Start free
-          </a>
-          <a
-            href="#features"
-            className="rounded-lg border border-[#d6dbe2] bg-white px-5 py-3 text-sm font-semibold uppercase tracking-wide text-[#111] hover:bg-[#f8fafc]"
-          >
-            Learn more
-          </a>
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-[#475467] md:text-lg">
+              Codexible giúp cậu ship nhanh hơn với lớp gateway cho coding agents: route thông minh, meter realtime, và khóa chi phí theo policy.
+            </p>
+
+            <div className="mt-7 flex flex-wrap items-center gap-3">
+              <a
+                href="#pricing"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#cc4b06] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+              >
+                Start free
+                <ArrowRight className="h-4 w-4" />
+              </a>
+              <a
+                href="#features"
+                className="rounded-xl border border-[#d7dee7] bg-white px-5 py-3 text-sm font-semibold text-[#111827] transition hover:bg-[#f8fafc]"
+              >
+                Explore features
+              </a>
+            </div>
+
+            <div className="mt-7 rounded-xl border border-[#e5e7eb] bg-[#0b1020] px-4 py-3 font-mono text-xs text-[#8de0ff] md:text-sm">
+              $ curl -fsSL "https://codexible.ai/install.sh?key=YOUR_KEY" | sh
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-[#e8ecf1] bg-gradient-to-b from-white to-[#f6f9fc] p-7 shadow-[0_20px_50px_rgba(15,23,42,.06)] md:p-8">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-[#667085]">Realtime snapshot</h3>
+            <div className="mt-5 space-y-3">
+              {[
+                ["Active keys", "1,248"],
+                ["Avg routing latency", "164ms"],
+                ["Today spend", "2.8M VND"],
+                ["Policy blocks", "37"],
+              ].map(([k, v]) => (
+                <div key={k} className="rounded-xl border border-[#e4e9f0] bg-white px-4 py-3">
+                  <p className="text-xs text-[#667085]">{k}</p>
+                  <p className="mt-1 text-xl font-bold text-[#101828]">{v}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-5 rounded-xl border border-[#f2d0bf] bg-[#fff3ed] p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#a43d0a]">Status</p>
+              <p className="mt-1 text-sm text-[#7a2e08]">Budget guardrails active • No overspend detected</p>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section id="features" className="bg-[#ecf7f8] py-16 md:py-20">
-        <div className="mx-auto w-full max-w-6xl px-6">
-          <div className="grid gap-5 md:grid-cols-3">
-            {features.map((item) => (
-              <article
-                key={item.body}
-                className="rounded-2xl border border-[#dde2e5] bg-white p-6 shadow-[0_8px_24px_rgba(18,38,63,0.06)]"
-              >
-                <h3 className="mb-3 text-3xl font-bold leading-tight text-black">{item.title}</h3>
-                <p className="mb-5 text-base leading-relaxed text-[#4b5563]">{item.body}</p>
-                <ul className="space-y-2">
-                  {item.points.map((point) => (
-                    <li key={point} className="text-[15px] leading-relaxed text-[#22303f]">
-                      • {point}
-                    </li>
-                  ))}
-                </ul>
+      <section id="features" className="bg-[#ecf7f8] py-14 md:py-20">
+        <div className="mx-auto max-w-6xl px-5 md:px-6">
+          <div className="mb-8 md:mb-10">
+            <p className="text-sm font-semibold uppercase tracking-wider text-[#a43d0a]">Core capabilities</p>
+            <h2 className="mt-2 text-3xl font-bold text-black md:text-5xl">Built for teams shipping every day</h2>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            {features.map(({ icon: Icon, title, body }) => (
+              <article key={title} className="rounded-2xl border border-[#dbe6e8] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,.06)]">
+                <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#fff3ed] text-[#cc4b06]">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <h3 className="mt-4 text-xl font-bold text-[#101828]">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#475467]">{body}</p>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="pricing" className="mx-auto w-full max-w-6xl px-6 py-16 md:py-20">
-        <h3 className="text-center text-4xl font-bold text-black md:text-5xl">Choose the right plan</h3>
-        <p className="mx-auto mt-3 max-w-3xl text-center text-base leading-relaxed text-[#4b5563] md:text-lg">
-          Pricing designed to fit solo builders, startup teams, and high-throughput production workloads.
-        </p>
+      <section id="pricing" className="mx-auto max-w-6xl px-5 py-14 md:px-6 md:py-20">
+        <div className="text-center">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#a43d0a]">Pricing</p>
+          <h2 className="mt-2 text-3xl font-bold text-black md:text-5xl">Simple plans, predictable spend</h2>
+        </div>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
+        <div className="mt-10 grid gap-4 md:grid-cols-3">
           {plans.map((plan) => (
             <article
               key={plan.name}
-              className="rounded-2xl border border-[#dde2e5] bg-white p-7 shadow-[0_8px_24px_rgba(18,38,63,0.04)]"
+              className={`rounded-2xl border p-6 ${
+                plan.highlight
+                  ? "border-[#cc4b06] bg-[#fffaf7] shadow-[0_16px_40px_rgba(204,75,6,.15)]"
+                  : "border-[#e4e9f0] bg-white shadow-[0_10px_28px_rgba(15,23,42,.05)]"
+              }`}
             >
-              <h4 className="text-2xl font-bold text-black">{plan.name}</h4>
-              <p className="mt-2 text-2xl font-bold text-[#cc4b06]">{plan.price}</p>
-
-              <div className="mt-5 space-y-2">
-                {plan.points.map((point) => (
-                  <p key={point} className="text-[15px] leading-relaxed text-[#374151]">
-                    • {point}
-                  </p>
-                ))}
+              <h3 className="text-xl font-bold text-black">{plan.name}</h3>
+              <div className="mt-3 flex items-end gap-1">
+                <span className="text-3xl font-bold text-[#101828]">{plan.price}</span>
+                <span className="pb-1 text-sm text-[#667085]">{plan.period}</span>
               </div>
+
+              <ul className="mt-5 space-y-2">
+                {plan.points.map((point) => (
+                  <li key={point} className="flex items-center gap-2 text-sm text-[#344054]">
+                    <BadgeCheck className="h-4 w-4 text-[#cc4b06]" />
+                    {point}
+                  </li>
+                ))}
+              </ul>
+
+              <a
+                href="#"
+                className={`mt-6 inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
+                  plan.highlight ? "bg-[#cc4b06] text-white hover:opacity-90" : "border border-[#d7dee7] hover:bg-[#f8fafc]"
+                }`}
+              >
+                Choose {plan.name}
+              </a>
             </article>
           ))}
         </div>
       </section>
 
-      <section id="customers" className="border-y border-[#e8edf2] bg-white py-16 md:py-20">
-        <div className="mx-auto w-full max-w-6xl px-6 text-center">
-          <h3 className="text-4xl font-bold text-black md:text-5xl">Trusted by teams that ship fast</h3>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-[#4b5563] md:text-lg">
-            Built for developers and product teams running coding workloads in production.
-          </p>
-
-          <div className="mx-auto mt-8 grid max-w-4xl gap-4 md:grid-cols-3">
-            <div className="rounded-xl border border-[#e5e7eb] bg-[#fbfdff] p-5">
-              <p className="text-3xl font-bold text-black">99.95%</p>
-              <p className="mt-2 text-sm text-[#6b7280]">Target uptime</p>
+      <section id="trust" className="border-y border-[#e5e7eb] bg-white">
+        <div className="mx-auto grid max-w-6xl gap-4 px-5 py-12 md:grid-cols-3 md:px-6">
+          {[
+            ["99.95%", "Gateway uptime target"],
+            ["< 180ms", "Average routing overhead"],
+            ["24/7", "Guardrails & alerts"],
+          ].map(([value, label]) => (
+            <div key={label} className="rounded-xl border border-[#e6ebf2] bg-[#fbfdff] p-5 text-center">
+              <p className="text-3xl font-bold text-[#101828]">{value}</p>
+              <p className="mt-1 text-sm text-[#667085]">{label}</p>
             </div>
-            <div className="rounded-xl border border-[#e5e7eb] bg-[#fbfdff] p-5">
-              <p className="text-3xl font-bold text-black">&lt; 180ms</p>
-              <p className="mt-2 text-sm text-[#6b7280]">Routing overhead</p>
-            </div>
-            <div className="rounded-xl border border-[#e5e7eb] bg-[#fbfdff] p-5">
-              <p className="text-3xl font-bold text-black">24/7</p>
-              <p className="mt-2 text-sm text-[#6b7280]">Spend guardrails</p>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
       <footer className="bg-white py-8">
-        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-6 text-sm text-[#4b5563] md:flex-row">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 text-sm text-[#667085] md:flex-row md:px-6">
           <p>© {new Date().getFullYear()} Codexible</p>
           <div className="flex items-center gap-5">
             <a href="#features" className="hover:text-black">Features</a>
             <a href="#pricing" className="hover:text-black">Pricing</a>
-            <a href="#customers" className="hover:text-black">Customers</a>
+            <a href="#trust" className="hover:text-black">Trust</a>
           </div>
         </div>
       </footer>
