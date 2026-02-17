@@ -37,12 +37,6 @@ function normalizeKey(input) {
 }
 
 // Shell-safe single-quote escaping: ' -> '\''
-function shellSingleQuote(value) {
-  const v = normalizeKey(value);
-  if (!v) return "'YOUR_KEY'";
-  return "'" + v.replace(/'/g, "'\\''") + "'";
-}
-
 function buildInstallUrl(key) {
   const base = new URL('/install.sh', window.location.origin);
   const k = normalizeKey(key);
@@ -55,7 +49,6 @@ function buildSafeOneLiner(key) {
   // NOTE: This is UX hardening, but the server must also sanitize output.
   const baseUrl = window.location.origin;
   const k = normalizeKey(key);
-  const quoted = shellSingleQuote(k);
   const url = k ? `${baseUrl}/install.sh?key=${encodeURIComponent(k)}` : `${baseUrl}/install.sh?key=YOUR_KEY`;
   // Keep it one-liner and copy-friendly
   return `curl -fsSL "${url}" | sh`;
