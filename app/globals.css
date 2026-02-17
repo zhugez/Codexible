@@ -4,7 +4,7 @@
   --accent: #e07a45;
   --dark: #000;
   --tenary: #ecf7f8;
-  --base-font: var(--font-manrope), "Manrope", sans-serif;
+  --base-font: var(--font-manrope), "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 @theme inline {
@@ -24,6 +24,8 @@ body {
   color: #222;
   background-image: linear-gradient(to top, #dfe9f3, #fff);
   scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
@@ -31,7 +33,39 @@ a {
   text-decoration: none;
 }
 
+/* Accessibility: Skip link focus styles */
+:focus-visible {
+  outline: 2px solid #e07a45;
+  outline-offset: 2px;
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Selection styles */
 ::selection {
   background: rgba(204, 75, 6, 0.22);
   color: #111;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
