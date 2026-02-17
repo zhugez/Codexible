@@ -54,7 +54,7 @@ export function InstallScriptModal({ open, onClose, scriptText, loading, error, 
   // so local state resets on close without needing setState-in-effect.
 
   const statusText = useMemo(() => {
-    if (loading) return "Fetching install.sh…";
+    if (loading) return "Loading…";
     if (error) return error;
     if (copied === "ok") return "Copied";
     if (copied === "fail") return "Copy failed";
@@ -77,18 +77,20 @@ export function InstallScriptModal({ open, onClose, scriptText, loading, error, 
         <div className="flex items-start justify-between gap-4 border-b border-black/10 px-5 py-4">
           <div>
             <div className="text-base font-extrabold text-black">install.sh</div>
-            <div className="mt-0.5 text-xs text-[#667085]">Fetched from /install.sh (same origin)</div>
+            <div className="mt-0.5 text-xs text-[#667085]">Embedded on page (no fetch)</div>
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => onRefresh?.()}
-              className="rounded-xl border border-[#d7dee7] bg-white px-3 py-2 text-xs font-semibold text-[#111827] transition hover:bg-[#f8fafc]"
-              disabled={loading}
-            >
-              Refresh
-            </button>
+            {onRefresh ? (
+              <button
+                type="button"
+                onClick={() => onRefresh()}
+                className="rounded-xl border border-[#d7dee7] bg-white px-3 py-2 text-xs font-semibold text-[#111827] transition hover:bg-[#f8fafc]"
+                disabled={loading}
+              >
+                Refresh
+              </button>
+            ) : null}
 
             <button
               type="button"
