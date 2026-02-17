@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
+    "target": "ES2022",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -19,8 +19,17 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
-    }
+      "@/*": ["./*"],
+      "@/components/*": ["./app/components/*"],
+      "@/sections/*": ["./app/sections/*"],
+      "@/hooks/*": ["./app/hooks/*"],
+      "@/lib/*": ["./app/lib/*"],
+      "@/types": ["./app/types"]
+    },
+    "forceConsistentCasingInFileNames": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
   "include": [
     "next-env.d.ts",
@@ -30,5 +39,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "**/*.test.ts", "**/*.test.tsx", "vitest.config.ts", "vitest.setup.ts"]
 }

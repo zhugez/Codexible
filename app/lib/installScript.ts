@@ -1,10 +1,62 @@
-export function escapeSingleQuotes(input: string) {
-  return input.replace(/'/g, "'\\''");
+// Security validation patterns
+const ALLOWED_ENDPOINT_PATTERN =
+  /^https:\/\/[a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}(\/.*)?$/;
+const VALID_API_KEY_PATTERN = /^[a-zA-Z0-9_-]{0,128}$/;
+
+/**
+ * Validates and sanitizes endpoint URL
+ * @throws Error if endpoint is invalid
+ */
+function validateEndpoint(endpoint: string): void {
+  if (!endpoint) {
+    throw new Error("Endpoint URL is required");
+  }
+  if (!ALLOWED_ENDPOINT_PATTERN.test(endpoint)) {
+    throw new Error(
+      "Invalid endpoint URL. Must be a valid HTTPS URL with valid domain name."
+    );
+  }
 }
 
-export function buildInstallScript(defaultKey: string, defaultEndpoint: string) {
-  const safeKey = escapeSingleQuotes(defaultKey);
-  const safeEndpoint = escapeSingleQuotes(defaultEndpoint);
+/**
+ * Validates API key format
+ * @throws Error if API key contains invalid characters
+ */
+function validateApiKey(key: string): void {
+  if (key && !VALID_API_KEY_PATTERN.test(key)) {
+    throw new Error(
+      "Invalid API key format. Only alphanumeric characters, hyphens, and underscores are allowed."
+    );
+  }
+}
+
+/**
+ * Escapes special shell characters in a string
+ */
+function escapeForShell(input: string): string {
+  // Remove null bytes and control characters
+  const sanitized = input.replace(/[\x00-\x1F\x7F]/g, "");
+  // Escape single quotes by ending the quoted string, adding an escaped quote, and starting a new quoted string
+  return sanitized.replace(/'/g, "'\\''");
+}
+
+/**
+ * Builds the install.sh script with security validations
+ * @param defaultKey - Optional default API key
+ * @param defaultEndpoint - The endpoint URL (required)
+ * @returns The complete install script content
+ * @throws Error if inputs are invalid
+ */
+export function buildInstallScript(
+  defaultKey: string,
+  defaultEndpoint: string
+): string {
+  // Validate inputs
+  validateEndpoint(defaultEndpoint);
+  validateApiKey(defaultKey);
+
+  const safeKey = escapeForShell(defaultKey);
+  const safeEndpoint = escapeForShell(defaultEndpoint);
 
   return `#!/usr/bin/env sh
 
