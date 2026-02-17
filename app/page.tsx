@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowRight, BadgeCheck, BarChart3, Cpu, ShieldCheck, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRight, BadgeCheck, BarChart3, Copy, Cpu, Download, ShieldCheck, Zap } from "lucide-react";
+import { InstallScriptModal } from "./components/InstallScriptModal";
 
 type Lang = "vi" | "en";
 
@@ -152,6 +153,39 @@ export default function Home() {
   const [lang, setLang] = useState<Lang>("vi");
   const t = copy[lang];
 
+  const [installOpen, setInstallOpen] = useState(false);
+  const [installText, setInstallText] = useState<string>("");
+  const [installLoading, setInstallLoading] = useState(false);
+  const [installError, setInstallError] = useState<string | null>(null);
+
+  async function fetchInstallScript() {
+    setInstallLoading(true);
+    setInstallError(null);
+    try {
+      // Same-origin: avoids opening new tab and keeps CF happy.
+      const resp = await fetch("/install.sh", { cache: "no-store" });
+      const text = await resp.text();
+      if (!resp.ok) {
+        setInstallError(`HTTP ${resp.status}`);
+      }
+      setInstallText(text);
+    } catch (e) {
+      setInstallError(String(e));
+      setInstallText("");
+    } finally {
+      setInstallLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!installOpen) return;
+    // Lazy-load install script on open.
+    if (!installText && !installLoading && !installError) {
+      fetchInstallScript();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [installOpen]);
+
   return (
     <div className="text-[#141414]">
       <header className="sticky top-0 z-50 border-b border-black/5 bg-white/85 backdrop-blur">
@@ -226,6 +260,43 @@ export default function Home() {
 
             <div className="mt-7 rounded-xl border border-[#e5e7eb] bg-[#0b1020] px-4 py-3 font-mono text-xs text-[#8de0ff] md:text-sm">
               {t.install}
+            </div>
+
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setInstallOpen(true)}
+                className="inline-flex items-center gap-2 rounded-xl bg-[#e07a45] px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white transition hover:opacity-90"
+              >
+                <Download className="h-4 w-4" />
+                View install.sh
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(t.install);
+                  } catch {
+                    // fallback
+                    const ta = document.createElement("textarea");
+                    ta.value = t.install;
+                    ta.style.cssText = "position:fixed;top:0;left:0;opacity:0;";
+                    document.body.appendChild(ta);
+                    ta.focus();
+                    ta.select();
+                    try {
+                      document.execCommand("copy");
+                    } finally {
+                      document.body.removeChild(ta);
+                    }
+                  }
+                }}
+                className="inline-flex items-center gap-2 rounded-xl border border-[#d7dee7] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#111827] transition hover:bg-[#f8fafc]"
+              >
+                <Copy className="h-4 w-4" />
+                Copy command
+              </button>
             </div>
           </div>
 
@@ -366,6 +437,16 @@ export default function Home() {
           </div>
         </div>
       </footer>
+      {installOpen ? (
+        <InstallScriptModal
+          open={installOpen}
+          onClose={() => setInstallOpen(false)}
+          scriptText={installText}
+          loading={installLoading}
+          error={installError}
+          onRefresh={fetchInstallScript}
+        />
+      ) : null}
     </div>
   );
 }
