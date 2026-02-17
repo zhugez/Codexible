@@ -8,7 +8,7 @@ type Props = {
   scriptText: string;
   loading: boolean;
   error: string | null;
-  onRefresh: () => void;
+  onRefresh?: () => void;
 };
 
 async function copyToClipboard(text: string) {
@@ -83,7 +83,7 @@ export function InstallScriptModal({ open, onClose, scriptText, loading, error, 
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={onRefresh}
+              onClick={() => onRefresh?.()}
               className="rounded-xl border border-[#d7dee7] bg-white px-3 py-2 text-xs font-semibold text-[#111827] transition hover:bg-[#f8fafc]"
               disabled={loading}
             >
