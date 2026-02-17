@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ArrowRight, BadgeCheck, BarChart3, Copy, Cpu, Download, ShieldCheck, Zap } from "lucide-react";
 import { InstallScriptModal } from "./components/InstallScriptModal";
+import { buildInstallScript } from "./lib/installScript";
 
 type Lang = "vi" | "en";
 
@@ -154,37 +155,16 @@ export default function Home() {
   const t = copy[lang];
 
   const [installOpen, setInstallOpen] = useState(false);
-  const [installText, setInstallText] = useState<string>("");
-  const [installLoading, setInstallLoading] = useState(false);
-  const [installError, setInstallError] = useState<string | null>(null);
 
-  async function fetchInstallScript() {
-    setInstallLoading(true);
-    setInstallError(null);
-    try {
-      // Same-origin: avoids opening new tab and keeps CF happy.
-      const resp = await fetch("/install.sh", { cache: "no-store" });
-      const text = await resp.text();
-      if (!resp.ok) {
-        setInstallError(`HTTP ${resp.status}`);
-      }
-      setInstallText(text);
-    } catch (e) {
-      setInstallError(String(e));
-      setInstallText("");
-    } finally {
-      setInstallLoading(false);
-    }
+  // Generate the script locally in the UI (no fetch).
+  // This uses the same template as /install.sh.
+  const installText = buildInstallScript("", "https://codexible.me");
+  const installLoading = false;
+  const installError = null;
+
+  function refreshInstallScript() {
+    // no-op (generated on render)
   }
-
-  useEffect(() => {
-    if (!installOpen) return;
-    // Lazy-load install script on open.
-    if (!installText && !installLoading && !installError) {
-      fetchInstallScript();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [installOpen]);
 
   return (
     <div className="text-[#141414]">
@@ -444,7 +424,7 @@ export default function Home() {
           scriptText={installText}
           loading={installLoading}
           error={installError}
-          onRefresh={fetchInstallScript}
+          onRefresh={refreshInstallScript}
         />
       ) : null}
     </div>
