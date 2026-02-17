@@ -157,14 +157,11 @@ export default function Home() {
   const [installOpen, setInstallOpen] = useState(false);
 
   // Generate the script locally in the UI (no fetch).
-  // This uses the same template as /install.sh.
   const installText = buildInstallScript("", "https://codexible.me");
   const installLoading = false;
   const installError = null;
 
-  function refreshInstallScript() {
-    // no-op (generated on render)
-  }
+  // (no refresh; script is generated locally)
 
   return (
     <div className="text-[#141414]">
@@ -249,7 +246,7 @@ export default function Home() {
                 className="inline-flex items-center gap-2 rounded-xl bg-[#e07a45] px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white transition hover:opacity-90"
               >
                 <Download className="h-4 w-4" />
-                View install.sh
+                View installer script
               </button>
 
               <button
@@ -424,7 +421,6 @@ export default function Home() {
           scriptText={installText}
           loading={installLoading}
           error={installError}
-          onRefresh={refreshInstallScript}
         />
       ) : null}
     </div>
