@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Install Script Modal Prototype</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="container header__inner">
+      <div class="brand">Claudible</div>
+      <div class="hint">Prototype: open install script in a modal + copy</div>
+    </div>
+  </header>
+
+  <main class="container main">
+    <h1>Install</h1>
+    <p class="muted">
+      Click the button to fetch <code>/install.sh</code> and display it in a modal.
+      This avoids opening a new tab (mitigates CF/new-tab issues) and ensures the content is treated as text.
+    </p>
+
+    <div class="card">
+      <div class="row">
+        <label class="label" for="key">API Key (optional)</label>
+        <input id="key" class="input" placeholder="sk-..." autocomplete="off" />
+      </div>
+
+      <div class="actions">
+        <button id="btnView" class="btn btn-primary" type="button">View install.sh in modal</button>
+        <button id="btnCopyOneLiner" class="btn btn-secondary" type="button">Copy safe one-liner</button>
+      </div>
+
+      <div class="note">
+        <div class="note__title">Notes</div>
+        <ul>
+          <li>Modal content is inserted via <code>textContent</code> only (no HTML interpretation).</li>
+          <li>The “safe one-liner” uses a single-quoted key with escaping to prevent shell expansion.</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div id="modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Install script modal">
+    <div class="modal__backdrop" data-close="true"></div>
+    <div class="modal__panel" role="document">
+      <div class="modal__header">
+        <div>
+          <div class="modal__title">install.sh</div>
+          <div id="modalSub" class="modal__sub muted"></div>
+        </div>
+        <button class="icon-btn" id="btnClose" type="button" aria-label="Close">✕</button>
+      </div>
+
+      <div class="modal__body">
+        <div class="toolbar">
+          <button id="btnCopy" class="btn btn-secondary" type="button">Copy</button>
+          <span id="status" class="status muted"></span>
+        </div>
+
+        <pre class="code"><code id="code"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
