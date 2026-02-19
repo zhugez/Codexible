@@ -6,6 +6,8 @@ export interface NavCopy {
   features: string;
   pricing: string;
   trust: string;
+  docs: string;
+  dashboard: string;
 }
 
 export interface Plan {

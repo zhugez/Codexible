@@ -2,7 +2,13 @@ import { Cpu, BarChart3, ShieldCheck } from "lucide-react";
 import type { Translation } from "@/app/types";
 
 export const en: Translation = {
-  nav: { features: "Features", pricing: "Pricing", trust: "Trust" },
+  nav: {
+    features: "Features",
+    pricing: "Pricing",
+    trust: "Trust",
+    docs: "Docs",
+    dashboard: "Dashboard",
+  },
   ctaTop: "Get API Key",
   badge: "Codex API Infrastructure",
   heroTitleA: "One endpoint.",

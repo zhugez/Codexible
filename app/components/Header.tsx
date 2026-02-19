@@ -40,6 +40,12 @@ export function Header({ lang, onLangChange, nav, ctaTop }: HeaderProps) {
           <a href="#trust" className="hover:text-black transition-colors">
             {nav.trust}
           </a>
+          <a href="/docs" className="hover:text-black transition-colors">
+            {nav.docs}
+          </a>
+          <a href="/dashboard/login" className="hover:text-black transition-colors">
+            {nav.dashboard}
+          </a>
         </nav>
 
         {/* Actions */}

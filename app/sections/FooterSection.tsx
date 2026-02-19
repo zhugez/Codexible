@@ -15,7 +15,7 @@ export function FooterSection({ nav }: FooterSectionProps) {
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 text-sm text-[#667085] md:flex-row md:px-6">
         <p>© {currentYear} Codexible</p>
         <nav
-          className="flex items-center gap-5"
+          className="flex flex-wrap items-center gap-5"
           aria-label="Footer navigation"
         >
           <a
@@ -35,6 +35,18 @@ export function FooterSection({ nav }: FooterSectionProps) {
             className="transition-colors hover:text-black focus:outline-none focus:underline"
           >
             {nav.trust}
+          </a>
+          <a
+            href="/docs"
+            className="transition-colors hover:text-black focus:outline-none focus:underline"
+          >
+            {nav.docs}
+          </a>
+          <a
+            href="/dashboard/login"
+            className="transition-colors hover:text-black focus:outline-none focus:underline"
+          >
+            {nav.dashboard}
           </a>
         </nav>
       </div>
