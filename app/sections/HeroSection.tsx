@@ -2,8 +2,7 @@
 
 import { ArrowRight, Zap, Download } from "lucide-react";
 import type { Translation, Lang } from "@/app/types";
-import { MetricCard } from "@/app/components/MetricCard";
-import { CopyButton } from "@/app/components/CopyButton";
+import { MetricCard, CopyButton } from "@/app/components";
 
 interface HeroSectionProps {
   t: Translation;

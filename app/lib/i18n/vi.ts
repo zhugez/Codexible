@@ -51,7 +51,7 @@ export const vi: Translation = {
     {
       name: "Pro",
       price: "30$",
-      description: "Dành cho ngườiiii dùng thường xuyên và team nhỏ",
+      description: "Dành cho người dùng thường xuyên và team nhỏ",
       points: [
         "250 credit/ngày",
         "Xử lý nhanh hơn",
@@ -85,12 +85,12 @@ export const vi: Translation = {
     {
       icon: Cpu,
       title: "Smart Routing Engine",
-      body: "Tự động route prompt theo policy để cân bằng quality và cost theo thờii gian thực.",
+      body: "Tự động route prompt theo policy để cân bằng quality và cost theo thời gian thực.",
     },
     {
       icon: BarChart3,
       title: "Live Cost Control",
-      body: "Theo dõii token, request, burn-rate theo user/team với cảnh báo vượt ngân sách.",
+      body: "Theo dõi token, request, burn-rate theo user/team với cảnh báo vượt ngân sách.",
     },
     {
       icon: ShieldCheck,

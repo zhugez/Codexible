@@ -1,4 +1,4 @@
-import { MOCK_TOKENS } from "@/app/lib/mockTokens";
+import { MOCK_TOKENS } from "@/app/lib";
 
 export default function DocsPage() {
   return (

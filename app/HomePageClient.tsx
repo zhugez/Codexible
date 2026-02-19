@@ -1,15 +1,16 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { translations, type Lang } from "@/app/lib/i18n/types";
-import { buildInstallScript } from "@/app/lib/installScript";
-import { Header } from "@/app/components/Header";
-import { InstallScriptModal } from "@/app/components/InstallScriptModal";
-import { HeroSection } from "@/app/sections/HeroSection";
-import { FeaturesSection } from "@/app/sections/FeaturesSection";
-import { PricingSection } from "@/app/sections/PricingSection";
-import { TrustSection } from "@/app/sections/TrustSection";
-import { FooterSection } from "@/app/sections/FooterSection";
+import { translations, type Lang } from "@/app/lib";
+import { buildInstallScript } from "@/app/lib";
+import { Header, InstallScriptModal } from "@/app/components";
+import {
+  HeroSection,
+  FeaturesSection,
+  PricingSection,
+  TrustSection,
+  FooterSection,
+} from "@/app/sections";
 
 /**
  * Client-side wrapper for the homepage with interactive state
@@ -22,13 +23,10 @@ export function HomePageClient() {
   const t = translations[lang];
 
   // Generate install script
-  const installText = useMemo(() => {
-    try {
-      return buildInstallScript("", "https://codexible.me");
-    } catch {
-      return "#!/usr/bin/env sh\n# Error generating install script";
-    }
-  }, []);
+  const installText = useMemo(
+    () => buildInstallScript("", "https://codexible.me"),
+    []
+  );
 
   return (
     <div className="text-[#141414]">
@@ -67,8 +65,6 @@ export function HomePageClient() {
           open={installOpen}
           onClose={() => setInstallOpen(false)}
           scriptText={installText}
-          loading={false}
-          error={null}
         />
       )}
     </div>

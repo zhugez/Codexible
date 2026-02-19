@@ -1,4 +1,4 @@
-import { findToken } from "@/app/lib/mockTokens";
+import { findToken } from "@/app/lib";
 
 type DashboardPageProps = {
   searchParams: Promise<{ token?: string }>;

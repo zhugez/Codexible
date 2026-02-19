@@ -1,7 +1,7 @@
 "use client";
 
 import type { Lang, NavCopy } from "@/app/types";
-import { LanguageToggle } from "./LanguageToggle";
+import { LanguageToggle } from "@/app/components/LanguageToggle";
 
 interface HeaderProps {
   lang: Lang;

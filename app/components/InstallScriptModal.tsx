@@ -1,45 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect } from "react";
+import { useCopyToClipboard } from "@/app/hooks";
 
 type Props = {
   open: boolean;
   onClose: () => void;
   scriptText: string;
-  loading: boolean;
-  error: string | null;
-  onRefresh?: () => void;
 };
 
-async function copyToClipboard(text: string) {
-  if (!text) return false;
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    // Fallback for older browsers / denied perms
-    const ta = document.createElement("textarea");
-    ta.value = text;
-    ta.style.position = "fixed";
-    ta.style.top = "0";
-    ta.style.left = "0";
-    ta.style.opacity = "0";
-    document.body.appendChild(ta);
-    ta.focus();
-    ta.select();
-    let ok = false;
-    try {
-      ok = document.execCommand("copy");
-    } catch {
-      ok = false;
-    }
-    document.body.removeChild(ta);
-    return ok;
-  }
-}
-
-export function InstallScriptModal({ open, onClose, scriptText, loading, error, onRefresh }: Props) {
-  const [copied, setCopied] = useState<"idle" | "ok" | "fail">("idle");
+export function InstallScriptModal({ open, onClose, scriptText }: Props) {
+  const { copy, state } = useCopyToClipboard();
 
   useEffect(() => {
     if (!open) return;
@@ -50,17 +21,14 @@ export function InstallScriptModal({ open, onClose, scriptText, loading, error, 
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open, onClose]);
 
-  // Note: component is conditionally mounted by the parent when `open` is true,
-  // so local state resets on close without needing setState-in-effect.
-
-  const statusText = useMemo(() => {
-    if (loading) return "Loading…";
-    if (error) return error;
-    if (copied === "ok") return "Copied";
-    if (copied === "fail") return "Copy failed";
-    if (scriptText) return `${scriptText.length.toLocaleString()} bytes`;
-    return "";
-  }, [loading, error, copied, scriptText]);
+  const statusText =
+    state === "success"
+      ? "Copied"
+      : state === "error"
+        ? "Copy failed"
+        : scriptText
+          ? `${scriptText.length.toLocaleString()} bytes`
+          : "";
 
   if (!open) return null;
 
@@ -81,26 +49,11 @@ export function InstallScriptModal({ open, onClose, scriptText, loading, error, 
           </div>
 
           <div className="flex items-center gap-2">
-            {onRefresh ? (
-              <button
-                type="button"
-                onClick={() => onRefresh()}
-                className="rounded-xl border border-[#d7dee7] bg-white px-3 py-2 text-xs font-semibold text-[#111827] transition hover:bg-[#f8fafc]"
-                disabled={loading}
-              >
-                Refresh
-              </button>
-            ) : null}
-
             <button
               type="button"
-              onClick={async () => {
-                const ok = await copyToClipboard(scriptText);
-                setCopied(ok ? "ok" : "fail");
-                setTimeout(() => setCopied("idle"), 2000);
-              }}
+              onClick={() => copy(scriptText)}
               className="rounded-xl bg-[#e07a45] px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90"
-              disabled={loading || !scriptText}
+              disabled={!scriptText}
             >
               Copy
             </button>
@@ -120,7 +73,7 @@ export function InstallScriptModal({ open, onClose, scriptText, loading, error, 
           <div className="mb-3 text-xs text-[#667085]">{statusText}</div>
 
           <pre className="max-h-[68vh] overflow-auto rounded-xl border border-[#1f2937] bg-[#0b1020] p-4 text-xs text-[#8de0ff]">
-            <code>{loading ? "" : scriptText || (error ? "" : "(empty)")}</code>
+            <code>{scriptText || "(empty)"}</code>
           </pre>
         </div>
       </div>

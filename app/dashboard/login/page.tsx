@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { findToken } from "@/app/lib/mockTokens";
+import { findToken } from "@/app/lib";
 
 export default function DashboardLoginPage() {
   const [token, setToken] = useState("");

@@ -8,10 +8,11 @@ interface TrustSectionProps {
  * Trust indicators section with key metrics
  */
 export function TrustSection({ t }: TrustSectionProps) {
+  const [uptimeLabel, latencyLabel, guardrailsLabel] = t.trustLabels;
   const metrics: [string, string][] = [
-    ["99.95%", t.trustLabels[0]],
-    ["< 180ms", t.trustLabels[1]],
-    ["24/7", t.trustLabels[2]],
+    ["99.95%", uptimeLabel],
+    ["< 180ms", latencyLabel],
+    ["24/7", guardrailsLabel],
   ];
 
   return (
