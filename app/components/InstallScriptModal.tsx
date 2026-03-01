@@ -41,18 +41,18 @@ export function InstallScriptModal({ open, onClose, scriptText }: Props) {
         onClick={onClose}
       />
 
-      <div className="relative mx-auto mt-[6vh] w-[min(980px,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-black/10 bg-white shadow-2xl">
-        <div className="flex items-start justify-between gap-4 border-b border-black/10 px-5 py-4">
+      <div className="relative mx-auto mt-[6vh] w-[min(980px,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-primary)] shadow-2xl">
+        <div className="flex items-start justify-between gap-4 border-b border-[var(--border)] px-5 py-4">
           <div>
-            <div className="text-base font-extrabold text-black">install.sh</div>
-            <div className="mt-0.5 text-xs text-[#667085]">Embedded on page (no fetch)</div>
+            <div className="text-base font-extrabold text-[var(--text-primary)]">install.sh</div>
+            <div className="mt-0.5 text-xs text-[var(--text-muted)]">Embedded on page (no fetch)</div>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => copy(scriptText)}
-              className="rounded-xl bg-[#e07a45] px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90"
+              className="rounded-xl bg-[var(--accent)] px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90"
               disabled={!scriptText}
             >
               Copy
@@ -62,7 +62,7 @@ export function InstallScriptModal({ open, onClose, scriptText }: Props) {
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="rounded-xl border border-[#d7dee7] bg-white px-3 py-2 text-xs font-semibold text-[#111827] transition hover:bg-[#f8fafc]"
+              className="rounded-xl border border-[var(--border)] bg-[var(--bg-primary)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] transition hover:bg-[var(--bg-secondary)]"
             >
               ✕
             </button>
@@ -70,9 +70,9 @@ export function InstallScriptModal({ open, onClose, scriptText }: Props) {
         </div>
 
         <div className="px-5 py-4">
-          <div className="mb-3 text-xs text-[#667085]">{statusText}</div>
+          <div className="mb-3 text-xs text-[var(--text-muted)]">{statusText}</div>
 
-          <pre className="max-h-[68vh] overflow-auto rounded-xl border border-[#1f2937] bg-[#0b1020] p-4 text-xs text-[#8de0ff]">
+          <pre className="max-h-[68vh] overflow-auto rounded-xl border border-[var(--border)] bg-[var(--bg-code)] p-4 text-xs text-[#8de0ff]">
             <code>{scriptText || "(empty)"}</code>
           </pre>
         </div>

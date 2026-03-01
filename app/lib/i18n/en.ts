@@ -1,4 +1,4 @@
-import { Cpu, BarChart3, ShieldCheck } from "lucide-react";
+import { Cpu, BarChart3, ShieldCheck, Monitor, Globe, DollarSign } from "lucide-react";
 import type { Translation } from "@/app/types";
 
 export const en: Translation = {
@@ -15,11 +15,11 @@ export const en: Translation = {
   heroTitleB: "Real control.",
   heroDesc:
     "Codexible helps teams ship faster with a gateway for coding agents: smart routing, realtime metering, and policy-based cost control.",
-  heroStart: "Start free",
-  heroExplore: "Explore features",
+  heroStart: "Get Started",
+  heroExplore: "View Documentation",
   snapshot: "Realtime snapshot",
   statusTitle: "Status",
-  statusBody: "Budget guardrails active • No overspend detected",
+  statusBody: "Budget guardrails active \u2022 No overspend detected",
   coreLabel: "Core capabilities",
   coreTitle: "Built for teams shipping every day",
   pricingLabel: "Pricing",
@@ -97,5 +97,77 @@ export const en: Translation = {
       title: "Margin Guardrails",
       body: "Rate limits, quotas, and hard caps to prevent margin leaks under load.",
     },
+    {
+      icon: Monitor,
+      title: "Real-time Dashboard",
+      body: "Live usage tracking. Monitor balance, costs, and requests in real-time.",
+    },
+    {
+      icon: Globe,
+      title: "Cross-Platform",
+      body: "Works on macOS, Linux, and Windows. One-line install scripts for all platforms.",
+    },
+    {
+      icon: DollarSign,
+      title: "Flexible Pricing",
+      body: "Pay-as-you-go or monthly subscription. Transparent pricing, no hidden fees.",
+    },
   ],
+  steps: {
+    title: "Get started in 3 steps",
+    items: [
+      {
+        title: "Get your API key",
+        description: "Contact us to receive your API key and initial balance",
+      },
+      {
+        title: "Run install",
+        description: "One command sets up environment, settings, and optional tools",
+      },
+      {
+        title: "Start coding",
+        description: "Use Claude Code or any Anthropic-compatible tool",
+      },
+    ],
+  },
+  footerTagline: "Infrastructure for coding agents",
+  footerColumns: [
+    {
+      title: "Products",
+      links: [
+        { label: "Dashboard", href: "/dashboard/login" },
+        { label: "Docs", href: "/docs" },
+        { label: "Install", href: "#" },
+      ],
+    },
+    {
+      title: "Resources",
+      links: [
+        { label: "Pricing", href: "#pricing" },
+        { label: "FAQ", href: "#" },
+        { label: "Contact", href: "#" },
+      ],
+    },
+    {
+      title: "Legal",
+      links: [
+        { label: "Privacy Policy", href: "#" },
+        { label: "Terms of Service", href: "#" },
+      ],
+    },
+  ],
+  ctaSection: {
+    title: "Ready to get started?",
+    description: "Get your API key today and start building with Codexible infrastructure.",
+    primaryCta: "Get Started Now",
+    secondaryCta: "Contact on Telegram",
+  },
+  loginModal: {
+    title: "Login",
+    placeholder: "Enter your API key",
+    login: "Login",
+    cancel: "Cancel",
+    error: "Invalid API key. Please check and try again.",
+  },
+  toastCopied: "Copied to clipboard!",
 };

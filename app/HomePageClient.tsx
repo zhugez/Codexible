@@ -3,12 +3,14 @@
 import { useState, useMemo } from "react";
 import { translations, type Lang } from "@/app/lib";
 import { buildInstallScript } from "@/app/lib";
-import { Header, InstallScriptModal } from "@/app/components";
+import { Header, InstallScriptModal, LoginModal, FloatingContact } from "@/app/components";
 import {
   HeroSection,
   FeaturesSection,
+  StepsSection,
   PricingSection,
   TrustSection,
+  CtaSection,
   FooterSection,
 } from "@/app/sections";
 
@@ -18,6 +20,7 @@ import {
 export function HomePageClient() {
   const [lang, setLang] = useState<Lang>("vi");
   const [installOpen, setInstallOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
 
   // Get translations for current language
   const t = translations[lang];
@@ -29,10 +32,10 @@ export function HomePageClient() {
   );
 
   return (
-    <div className="text-[#141414]">
+    <div className="text-[var(--text-primary)]">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-black"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:rounded focus:bg-[var(--bg-primary)] focus:px-4 focus:py-2 focus:text-[var(--text-primary)]"
       >
         Skip to main content
       </a>
@@ -53,12 +56,18 @@ export function HomePageClient() {
 
         <FeaturesSection t={t} />
 
+        <StepsSection t={t} />
+
         <PricingSection t={t} />
 
         <TrustSection t={t} />
+
+        <CtaSection t={t} onOpenLogin={() => setLoginOpen(true)} />
       </main>
 
-      <FooterSection nav={t.nav} />
+      <FooterSection t={t} />
+
+      <FloatingContact />
 
       {installOpen && (
         <InstallScriptModal
@@ -67,6 +76,12 @@ export function HomePageClient() {
           scriptText={installText}
         />
       )}
+
+      <LoginModal
+        open={loginOpen}
+        onClose={() => setLoginOpen(false)}
+        t={t}
+      />
     </div>
   );
 }

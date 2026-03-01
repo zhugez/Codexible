@@ -18,7 +18,7 @@ export function TrustSection({ t }: TrustSectionProps) {
   return (
     <section
       id="trust"
-      className="border-y border-[#e5e7eb] bg-white"
+      className="border-y border-[var(--border)] bg-[var(--bg-primary)]"
       aria-labelledby="trust-heading"
     >
       <h2 id="trust-heading" className="sr-only">
@@ -28,10 +28,10 @@ export function TrustSection({ t }: TrustSectionProps) {
         {metrics.map(([value, label]) => (
           <div
             key={label}
-            className="rounded-xl border border-[#e6ebf2] bg-[#fbfdff] p-5 text-center transition-shadow hover:shadow-md"
+            className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-5 text-center transition-shadow hover:shadow-md"
           >
-            <p className="text-3xl font-bold text-[#101828]">{value}</p>
-            <p className="mt-1 text-sm text-[#667085]">{label}</p>
+            <p className="text-3xl font-bold text-[var(--text-primary)]">{value}</p>
+            <p className="mt-1 text-sm text-[var(--text-muted)]">{label}</p>
           </div>
         ))}
       </div>

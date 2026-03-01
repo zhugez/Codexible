@@ -25,9 +25,9 @@ export function CopyButton({
     "inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold uppercase tracking-wider transition disabled:opacity-50 disabled:cursor-not-allowed";
 
   const variantStyles = {
-    primary: "bg-[#e07a45] text-white hover:opacity-90",
+    primary: "bg-[var(--accent)] text-white hover:opacity-90",
     secondary:
-      "border border-[#d7dee7] bg-white text-[#111827] hover:bg-[#f8fafc]",
+      "border border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]",
   };
 
   const icon =

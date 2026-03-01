@@ -16,7 +16,7 @@ export function LanguageToggle({
 }: LanguageToggleProps) {
   return (
     <div
-      className="flex rounded-lg border border-[#d7dee7] bg-white p-0.5"
+      className="flex rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] p-0.5"
       role="group"
       aria-label="Select language"
     >
@@ -27,8 +27,8 @@ export function LanguageToggle({
         aria-label="Chuyển sang tiếng Việt"
         className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
           currentLang === "vi"
-            ? "bg-[#e07a45] text-white"
-            : "text-[#667085] hover:text-[#475467]"
+            ? "bg-[var(--accent)] text-white"
+            : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
         }`}
       >
         VI
@@ -40,8 +40,8 @@ export function LanguageToggle({
         aria-label="Switch to English"
         className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
           currentLang === "en"
-            ? "bg-[#e07a45] text-white"
-            : "text-[#667085] hover:text-[#475467]"
+            ? "bg-[var(--accent)] text-white"
+            : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
         }`}
       >
         EN

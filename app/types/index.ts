@@ -25,6 +25,21 @@ export interface Feature {
   body: string;
 }
 
+export interface StepItem {
+  title: string;
+  description: string;
+}
+
+export interface Steps {
+  title: string;
+  items: [StepItem, StepItem, StepItem];
+}
+
+export interface FooterColumn {
+  title: string;
+  links: { label: string; href: string }[];
+}
+
 export interface Translation {
   nav: NavCopy;
   ctaTop: string;
@@ -50,6 +65,23 @@ export interface Translation {
   install: string;
   trustLabels: [string, string, string];
   features: Feature[];
+  steps: Steps;
+  footerTagline: string;
+  footerColumns: [FooterColumn, FooterColumn, FooterColumn];
+  ctaSection: {
+    title: string;
+    description: string;
+    primaryCta: string;
+    secondaryCta: string;
+  };
+  loginModal: {
+    title: string;
+    placeholder: string;
+    login: string;
+    cancel: string;
+    error: string;
+  };
+  toastCopied: string;
 }
 
 export type Translations = Record<Lang, Translation>;

@@ -1,4 +1,6 @@
 import { findToken } from "@/app/lib";
+import { getDashboardOverview, type DashboardOverview } from "@/app/lib/api";
+import { DashboardClient } from "./DashboardClient";
 
 type DashboardPageProps = {
   searchParams: Promise<{ token?: string }>;
@@ -7,14 +9,49 @@ type DashboardPageProps = {
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const params = await searchParams;
   const token = params.token ?? "";
-  const record = findToken(token);
 
-  if (!record) {
+  let data: {
+    owner: string;
+    plan: string;
+    status: string;
+    dailyLimit: number;
+    usedToday: number;
+    tokenDisplay: string;
+    balance: number;
+  } | null = null;
+
+  try {
+    const overview: DashboardOverview = await getDashboardOverview(token);
+    data = {
+      owner: overview.user.email,
+      plan: overview.user.plan,
+      status: overview.user.status,
+      dailyLimit: overview.usage.daily_limit,
+      usedToday: overview.usage.credits_used,
+      tokenDisplay: overview.key.prefix + "...",
+      balance: overview.usage.daily_limit - overview.usage.credits_used,
+    };
+  } catch {
+    const record = findToken(token);
+    if (record) {
+      data = {
+        owner: record.owner,
+        plan: record.plan,
+        status: record.status,
+        dailyLimit: record.dailyLimit,
+        usedToday: record.usedToday,
+        tokenDisplay: record.token,
+        balance: record.dailyLimit - record.usedToday,
+      };
+    }
+  }
+
+  if (!data) {
     return (
       <main className="mx-auto max-w-4xl px-5 py-12 md:px-6">
-        <div className="rounded-2xl border border-[#fde2e2] bg-[#fff5f5] p-6">
-          <h1 className="text-xl font-semibold text-[#7a271a]">Unauthorized</h1>
-          <p className="mt-2 text-sm text-[#7a271a]">
+        <div className="rounded-2xl border border-[var(--red-light)] bg-[var(--red-light)] p-6">
+          <h1 className="text-xl font-semibold text-[var(--red)]">Unauthorized</h1>
+          <p className="mt-2 text-sm text-[var(--red)]">
             Token missing or invalid. Please login via <a className="underline" href="/dashboard/login">/dashboard/login</a>.
           </p>
         </div>
@@ -22,48 +59,5 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     );
   }
 
-  const usagePct = Math.min(100, Math.round((record.usedToday / record.dailyLimit) * 100));
-
-  return (
-    <main className="mx-auto max-w-6xl px-5 py-10 md:px-6">
-      <h1 className="text-3xl font-bold text-black md:text-4xl">Codexible Dashboard</h1>
-      <p className="mt-2 text-[#475467]">Welcome, {record.owner}</p>
-
-      <div className="mt-8 grid gap-4 md:grid-cols-3">
-        <StatCard label="Plan" value={record.plan} />
-        <StatCard label="Status" value={record.status} />
-        <StatCard label="Daily Limit" value={`${record.dailyLimit} credits`} />
-      </div>
-
-      <section className="mt-6 rounded-2xl border border-[#e8ecf1] bg-white p-6">
-        <h2 className="text-lg font-semibold">Today Usage</h2>
-        <p className="mt-1 text-sm text-[#667085]">
-          {record.usedToday} / {record.dailyLimit} credits
-        </p>
-        <div className="mt-4 h-3 overflow-hidden rounded-full bg-[#edf2f7]">
-          <div
-            className="h-full rounded-full bg-[#e07a45]"
-            style={{ width: `${usagePct}%` }}
-          />
-        </div>
-        <p className="mt-2 text-sm text-[#475467]">{usagePct}% used</p>
-      </section>
-
-      <section className="mt-6 rounded-2xl border border-[#e8ecf1] bg-white p-6">
-        <h2 className="text-lg font-semibold">Token</h2>
-        <code className="mt-3 block overflow-auto rounded-xl bg-[#0b1020] p-4 text-xs text-[#8de0ff] md:text-sm">
-          {record.token}
-        </code>
-      </section>
-    </main>
-  );
-}
-
-function StatCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-[#e8ecf1] bg-white p-5 shadow-sm">
-      <p className="text-xs font-semibold uppercase tracking-wider text-[#667085]">{label}</p>
-      <p className="mt-2 text-xl font-semibold text-black">{value}</p>
-    </div>
-  );
+  return <DashboardClient data={data} token={token} />;
 }

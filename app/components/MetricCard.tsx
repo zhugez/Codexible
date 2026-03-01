@@ -8,9 +8,9 @@ interface MetricCardProps {
  */
 export function MetricCard({ label, value }: MetricCardProps) {
   return (
-    <div className="rounded-xl border border-[#e4e9f0] bg-white px-4 py-3">
-      <p className="text-xs text-[#667085]">{label}</p>
-      <p className="mt-1 text-xl font-bold text-[#101828]">{value}</p>
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-primary)] px-4 py-3">
+      <p className="text-xs text-[var(--text-muted)]">{label}</p>
+      <p className="mt-1 text-xl font-bold text-[var(--text-primary)]">{value}</p>
     </div>
   );
 }

@@ -3,22 +3,38 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { findToken } from "@/app/lib";
+import { validateToken } from "@/app/lib/api";
 
 export default function DashboardLoginPage() {
   const [token, setToken] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const match = findToken(token);
-    if (!match) {
-      setError("Invalid token. Try one from the demo docs.");
-      return;
+    setError(null);
+    setLoading(true);
+
+    try {
+      // Try backend API first
+      const result = await validateToken(token);
+      if (result.valid) {
+        router.push(`/dashboard?token=${encodeURIComponent(token)}`);
+        return;
+      }
+    } catch {
+      // Backend unavailable — fall back to mock tokens
+      const match = findToken(token);
+      if (match) {
+        router.push(`/dashboard?token=${encodeURIComponent(match.token)}`);
+        return;
+      }
+    } finally {
+      setLoading(false);
     }
 
-    // Temporary: keep token in query for demo flow (no backend/session yet)
-    router.push(`/dashboard?token=${encodeURIComponent(match.token)}`);
+    setError("Invalid token. Try one from the demo docs.");
   };
 
   return (
@@ -26,7 +42,7 @@ export default function DashboardLoginPage() {
       <div className="w-full rounded-3xl border border-[#e8ecf1] bg-white p-7 shadow-[0_20px_50px_rgba(15,23,42,.06)] md:p-10">
         <h1 className="text-2xl font-bold text-black md:text-3xl">Dashboard Login</h1>
         <p className="mt-2 text-sm text-[#475467]">
-          Temporary token login (hardcoded JSON) for prototype testing.
+          Enter your API token to access the dashboard.
         </p>
 
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>
@@ -44,14 +60,15 @@ export default function DashboardLoginPage() {
 
           <button
             type="submit"
-            className="w-full rounded-xl bg-[#e07a45] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+            disabled={loading}
+            className="w-full rounded-xl bg-[#e07a45] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
           >
-            Enter Dashboard
+            {loading ? "Verifying..." : "Enter Dashboard"}
           </button>
         </form>
 
         <p className="mt-4 text-xs text-[#667085]">
-          Demo token list is in docs and hardcoded at <code>app/lib/mockTokens.ts</code>.
+          Demo tokens are listed on the <a className="underline" href="/docs">docs page</a>.
         </p>
       </div>
     </main>

@@ -1,54 +1,52 @@
-import type { NavCopy } from "@/app/types";
+import type { Translation } from "@/app/types";
 
 interface FooterSectionProps {
-  nav: NavCopy;
+  t: Translation;
 }
 
 /**
- * Footer with navigation links
+ * Footer with 4-column grid layout
  */
-export function FooterSection({ nav }: FooterSectionProps) {
+export function FooterSection({ t }: FooterSectionProps) {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-white py-8">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 text-sm text-[#667085] md:flex-row md:px-6">
-        <p>© {currentYear} Codexible</p>
-        <nav
-          className="flex flex-wrap items-center gap-5"
-          aria-label="Footer navigation"
-        >
-          <a
-            href="#features"
-            className="transition-colors hover:text-black focus:outline-none focus:underline"
-          >
-            {nav.features}
-          </a>
-          <a
-            href="#pricing"
-            className="transition-colors hover:text-black focus:outline-none focus:underline"
-          >
-            {nav.pricing}
-          </a>
-          <a
-            href="#trust"
-            className="transition-colors hover:text-black focus:outline-none focus:underline"
-          >
-            {nav.trust}
-          </a>
-          <a
-            href="/docs"
-            className="transition-colors hover:text-black focus:outline-none focus:underline"
-          >
-            {nav.docs}
-          </a>
-          <a
-            href="/dashboard/login"
-            className="transition-colors hover:text-black focus:outline-none focus:underline"
-          >
-            {nav.dashboard}
-          </a>
-        </nav>
+    <footer className="border-t border-[var(--border)] bg-[var(--bg-primary)] py-12">
+      <div className="mx-auto max-w-6xl px-5 md:px-6">
+        {/* Grid */}
+        <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4">
+          {/* Brand column */}
+          <div>
+            <p className="text-lg font-bold text-[var(--text-primary)]">Codexible</p>
+            <p className="mt-2 text-sm text-[var(--text-muted)]">{t.footerTagline}</p>
+          </div>
+
+          {/* Dynamic columns */}
+          {t.footerColumns.map((col) => (
+            <div key={col.title}>
+              <p className="text-sm font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                {col.title}
+              </p>
+              <ul className="mt-3 space-y-2">
+                {col.links.map((link) => (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      className="text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)] focus:outline-none focus:underline"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom bar */}
+        <div className="mt-10 border-t border-[var(--border)] pt-6 text-center text-xs text-[var(--text-muted)]">
+          <p>&copy; {currentYear} Codexible. All rights reserved.</p>
+        </div>
       </div>
     </footer>
   );
