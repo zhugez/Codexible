@@ -5,6 +5,14 @@ import { useRouter } from "next/navigation";
 import { findToken } from "@/app/lib";
 import { validateToken } from "@/app/lib/api";
 
+const ENABLE_MOCK_FALLBACK = process.env.NEXT_PUBLIC_ENABLE_MOCK_TOKEN_FALLBACK === "true";
+const BACKEND_CONNECTIVITY_PATTERN =
+  /cannot reach backend api|content security policy|connect-src|failed to fetch|network error/i;
+
+function isConnectivityError(error: unknown): boolean {
+  return error instanceof Error && BACKEND_CONNECTIVITY_PATTERN.test(error.message);
+}
+
 export default function DashboardLoginPage() {
   const [token, setToken] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -17,14 +25,32 @@ export default function DashboardLoginPage() {
     setLoading(true);
 
     try {
-      // Try backend API first
       const result = await validateToken(token);
+      if (result.valid && result.role === "admin") {
+        router.push(`/dashboard/admin?token=${encodeURIComponent(token)}`);
+        return;
+      }
+
       if (result.valid) {
         router.push(`/dashboard?token=${encodeURIComponent(token)}`);
         return;
       }
-    } catch {
-      // Backend unavailable — fall back to mock tokens
+    } catch (error) {
+      if (isConnectivityError(error)) {
+        const message =
+          error instanceof Error ? error.message : "Cannot reach backend API.";
+        setError(message);
+        setLoading(false);
+        return;
+      }
+
+      if (!ENABLE_MOCK_FALLBACK) {
+        const message = error instanceof Error ? error.message : "Token validation failed";
+        setError(message);
+        setLoading(false);
+        return;
+      }
+
       const match = findToken(token);
       if (match) {
         router.push(`/dashboard?token=${encodeURIComponent(match.token)}`);
@@ -34,7 +60,11 @@ export default function DashboardLoginPage() {
       setLoading(false);
     }
 
-    setError("Invalid token. Try one from the demo docs.");
+    setError(
+      ENABLE_MOCK_FALLBACK
+        ? "Invalid token. Try one from the demo docs."
+        : "Invalid token. Please check your CLIProxyAPI token and try again.",
+    );
   };
 
   return (
@@ -67,9 +97,11 @@ export default function DashboardLoginPage() {
           </button>
         </form>
 
-        <p className="mt-4 text-xs text-[#667085]">
-          Demo tokens are listed on the <a className="underline" href="/docs">docs page</a>.
-        </p>
+        {ENABLE_MOCK_FALLBACK && (
+          <p className="mt-4 text-xs text-[#667085]">
+            Demo tokens are listed on the <a className="underline" href="/docs">docs page</a>.
+          </p>
+        )}
       </div>
     </main>
   );

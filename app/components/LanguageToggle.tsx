@@ -25,7 +25,7 @@ export function LanguageToggle({
         onClick={() => onLangChange("vi")}
         aria-pressed={currentLang === "vi"}
         aria-label="Chuyển sang tiếng Việt"
-        className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+        className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 ${
           currentLang === "vi"
             ? "bg-[var(--accent)] text-white"
             : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
@@ -38,7 +38,7 @@ export function LanguageToggle({
         onClick={() => onLangChange("en")}
         aria-pressed={currentLang === "en"}
         aria-label="Switch to English"
-        className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+        className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 ${
           currentLang === "en"
             ? "bg-[var(--accent)] text-white"
             : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"

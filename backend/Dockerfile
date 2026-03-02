@@ -1,25 +1,32 @@
-FROM rust:1.84-slim AS builder
-
+FROM rust:slim AS builder
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    cmake \
+    libssl-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY Cargo.toml Cargo.lock* ./
-RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release && rm -rf src
-
+COPY Cargo.toml Cargo.lock ./
 COPY . .
-RUN touch src/main.rs && cargo build --release
+RUN cargo build --release --locked --bin codexible-backend
 
-FROM debian:bookworm-slim
-
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
-
-COPY --from=builder /app/target/release/codexible-backend /usr/local/bin/codexible-backend
-COPY --from=builder /app/migrations /app/migrations
-
+FROM debian:bookworm-slim AS runner
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system --gid 1001 app \
+    && useradd --system --uid 1001 --gid app app
+
+COPY --from=builder --chown=app:app /app/target/release/codexible-backend /usr/local/bin/codexible-backend
+COPY --from=builder --chown=app:app /app/migrations /app/migrations
+
 ENV RUST_LOG=info
+
+USER app
 
 EXPOSE 3001
 

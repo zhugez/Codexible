@@ -1,0 +1,44 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build artifacts
+.next
+out
+build
+
+# Version control
+.git
+.gitignore
+
+# Backend (has its own Dockerfile context)
+backend/
+
+# IDE & editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env*.local
+
+# OpenSpec & docs
+openspec
+*.md
+!README.md
+
+# Test
+coverage
+playwright-report
+.artifacts
+
+# Misc
+d/
+tsconfig.tsbuildinfo

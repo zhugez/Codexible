@@ -1,0 +1,89 @@
+services:
+  # ── Frontend (Next.js) ──────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SITE_URL: http://localhost:10001
+        NEXT_PUBLIC_BRAND_NAME: Codexible
+        NEXT_PUBLIC_API_URL: http://localhost:3001
+        API_INTERNAL_URL: http://backend:3001
+        NEXT_PUBLIC_ENABLE_MOCK_TOKEN_FALLBACK: "false"
+    ports:
+      - "10001:10001"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_SITE_URL=http://localhost:10001
+      - NEXT_PUBLIC_BRAND_NAME=Codexible
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - API_INTERNAL_URL=http://backend:3001
+      - NEXT_PUBLIC_ENABLE_MOCK_TOKEN_FALLBACK=false
+    depends_on:
+      backend:
+        condition: service_started
+    restart: unless-stopped
+
+  # ── Backend (Rust / Axum) ───────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3001
+      - RUST_LOG=info
+      - DATABASE_URL=postgres://codexible:password@postgres:5432/codexible
+      - REDIS_URL=redis://redis:6379
+      - ALLOWED_ORIGINS=http://localhost:10001,http://127.0.0.1:10001
+      - API_KEY_HMAC_SECRET=dev_only_change_me_in_production_64chars_placeholder_string
+      - CLIPROXY_INTEGRATION_ENABLED=false
+      - CLIPROXY_UPSTREAM_URL=http://host.docker.internal:8317
+      - CLIPROXY_MANAGEMENT_URL=http://host.docker.internal:8317/v0/management
+      - CLIPROXY_MANAGEMENT_KEY=
+      - CLIPROXY_TIMEOUT_MS=8000
+      - CLIPROXY_DEFAULT_DAILY_LIMIT=1000
+      - ADMIN_EMAILS=team@codexible.me
+      - CLIPROXY_ADMIN_TOKENS=
+      - ADMIN_LOG_MAX_ENTRIES=500
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── PostgreSQL ──────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: codexible
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: codexible
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U codexible"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ── Redis ───────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pgdata:

@@ -16,8 +16,14 @@ pub enum AppError {
     #[error("Quota exceeded: {0}")]
     QuotaExceeded(String),
 
+    #[error("Rate limit exceeded: {0}")]
+    RateLimited(String),
+
     #[error("Bad request: {0}")]
     BadRequest(String),
+
+    #[error("Service unavailable: {0}")]
+    ServiceUnavailable(String),
 
     #[error("Internal error: {0}")]
     Internal(String),
@@ -42,7 +48,9 @@ impl AppError {
             Self::Unauthorized(_) => StatusCode::UNAUTHORIZED,
             Self::Forbidden(_) => StatusCode::FORBIDDEN,
             Self::QuotaExceeded(_) => StatusCode::TOO_MANY_REQUESTS,
+            Self::RateLimited(_) => StatusCode::TOO_MANY_REQUESTS,
             Self::BadRequest(_) => StatusCode::BAD_REQUEST,
+            Self::ServiceUnavailable(_) => StatusCode::SERVICE_UNAVAILABLE,
             Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
@@ -53,7 +61,9 @@ impl AppError {
             Self::Unauthorized(_) => "unauthorized",
             Self::Forbidden(_) => "forbidden",
             Self::QuotaExceeded(_) => "quota_exceeded",
+            Self::RateLimited(_) => "rate_limited",
             Self::BadRequest(_) => "bad_request",
+            Self::ServiceUnavailable(_) => "service_unavailable",
             Self::Internal(_) => "internal_error",
         }
     }

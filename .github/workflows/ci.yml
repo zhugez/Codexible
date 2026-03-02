@@ -90,10 +90,61 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
 
+  performance:
+    name: Performance Validation
+    runs-on: ubuntu-latest
+    needs: [lint, type-check, test]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Start backend stack
+        run: docker compose up -d postgres redis backend
+
+      - name: Wait for backend readiness
+        run: |
+          for i in {1..60}; do
+            if curl -fsS http://localhost:3001/health > /dev/null; then
+              echo "Backend is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose logs backend
+          exit 1
+
+      - name: Run performance validation (CI mode)
+        run: pnpm perf:validate:ci
+
+      - name: Upload performance report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-report
+          path: ./.artifacts/perf-report.json
+
+      - name: Stop backend stack
+        if: always()
+        run: docker compose down -v
+
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: [lint, type-check, test]
+    needs: [lint, type-check, test, performance]
     steps:
       - name: Checkout
         uses: actions/checkout@v4

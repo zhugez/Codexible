@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
+import { buildConnectSrcDirective } from "./app/lib/csp";
 
 const nextConfig: NextConfig = {
+  // Docker-optimized standalone output
+  output: "standalone",
   // Image optimization
   images: {
     formats: ["image/webp", "image/avif"],
@@ -45,7 +48,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self'",
-              "connect-src 'self'",
+              buildConnectSrcDirective(process.env.NEXT_PUBLIC_API_URL),
               "frame-ancestors 'none'",
             ].join("; "),
           },

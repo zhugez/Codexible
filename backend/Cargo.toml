@@ -13,6 +13,7 @@ tower-http = { version = "0.6", features = ["cors", "trace"] }
 # Serialization
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 
 # Database
 sqlx = { version = "0.8", features = [
@@ -26,10 +27,6 @@ sqlx = { version = "0.8", features = [
 
 # Redis
 fred = { version = "10", features = ["enable-rustls"] }
-
-# OpenAPI
-utoipa = { version = "5", features = ["axum_extras", "chrono", "uuid"] }
-utoipa-swagger-ui = { version = "8", features = ["axum"] }
 
 # Logging
 tracing = "0.1"
@@ -50,7 +47,6 @@ thiserror = "2"
 anyhow = "1"
 
 [dev-dependencies]
-reqwest = { version = "0.12", features = ["json"] }
 tokio = { version = "1", features = ["full", "test-util"] }
 
 [profile.release]

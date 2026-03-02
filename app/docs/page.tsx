@@ -50,6 +50,38 @@ export CODEXIBLE_API_KEY="YOUR_KEY"`}
           ))}
         </div>
       </section>
+
+      <section className="mt-6 rounded-2xl border border-[#e8ecf1] bg-white p-6 shadow-sm">
+        <h2 className="text-xl font-semibold text-black">5. Troubleshooting Login Console Errors</h2>
+        <div className="mt-3 space-y-3 text-sm text-[#475467]">
+          <p>
+            <strong>App-owned errors (need fixing):</strong> CSP violations such as
+            <code className="mx-1 rounded bg-[#f3f4f6] px-1 py-0.5">
+              connect-src &apos;self&apos;
+            </code>
+            blocking requests to your backend API URL.
+          </p>
+          <p>
+            <strong>Extension-origin noise (usually external):</strong>
+            <code className="mx-1 rounded bg-[#f3f4f6] px-1 py-0.5">Unchecked runtime.lastError</code>
+            and
+            <code className="mx-1 rounded bg-[#f3f4f6] px-1 py-0.5">lockdown-install.js</code>
+            can come from browser extensions and may be unrelated to Codexible app logic.
+          </p>
+          <ul className="list-disc space-y-1 pl-5">
+            <li>Check Network tab for `POST /api/auth/validate` request outcome.</li>
+            <li>
+              Verify frontend CSP `connect-src` allows your `NEXT_PUBLIC_API_URL` origin.
+            </li>
+            <li>
+              If using Docker, set `API_INTERNAL_URL` to an internal backend address (for example
+              `http://backend:3001`) for server-rendered dashboard calls.
+            </li>
+            <li>Confirm backend health endpoint is reachable (`/health`).</li>
+            <li>Retry in incognito mode with extensions disabled to isolate extension noise.</li>
+          </ul>
+        </div>
+      </section>
     </main>
   );
 }

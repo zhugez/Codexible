@@ -8,7 +8,9 @@ mod routes;
 mod services;
 
 use config::Config;
+use fred::interfaces::ClientLike;
 use sqlx::postgres::PgPoolOptions;
+use std::net::SocketAddr;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 #[tokio::main]
@@ -31,7 +33,8 @@ async fn main() -> anyhow::Result<()> {
     sqlx::migrate!("./migrations").run(&pool).await?;
     tracing::info!("Database migrations applied");
 
-    let redis = fred::clients::Client::default();
+    let redis_config = fred::types::config::Config::from_url(&config.redis_url)?;
+    let redis = fred::clients::Client::new(redis_config, None, None, None);
     redis.init().await?;
     tracing::info!("Connected to Redis");
 
@@ -41,7 +44,7 @@ async fn main() -> anyhow::Result<()> {
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     tracing::info!("Listening on {}", addr);
 
-    axum::serve(listener, app)
+    axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>())
         .with_graceful_shutdown(shutdown_signal())
         .await?;
 

@@ -1,0 +1,53 @@
+{
+  "criticalPaths": [
+    {
+      "id": "auth_validate",
+      "label": "/api/auth/validate",
+      "method": "POST",
+      "path": "/api/auth/validate",
+      "iterations": 10,
+      "requiresAuth": false,
+      "body": {
+        "token": "codexible_demo_business_2026"
+      },
+      "latencyBudgetMs": {
+        "local": 250,
+        "ci": 500
+      },
+      "throughputBudgetRps": {
+        "local": 12,
+        "ci": 4
+      }
+    },
+    {
+      "id": "dashboard_overview",
+      "label": "/api/dashboard/overview",
+      "method": "GET",
+      "path": "/api/dashboard/overview",
+      "requiresAuth": true,
+      "latencyBudgetMs": {
+        "local": 400,
+        "ci": 700
+      },
+      "throughputBudgetRps": {
+        "local": 8,
+        "ci": 3
+      }
+    },
+    {
+      "id": "usage_today",
+      "label": "/api/usage/today",
+      "method": "GET",
+      "path": "/api/usage/today",
+      "requiresAuth": true,
+      "latencyBudgetMs": {
+        "local": 300,
+        "ci": 600
+      },
+      "throughputBudgetRps": {
+        "local": 10,
+        "ci": 4
+      }
+    }
+  ]
+}

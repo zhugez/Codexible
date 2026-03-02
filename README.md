@@ -54,6 +54,9 @@ pnpm type-check
 # Unit tests
 pnpm test
 
+# Performance validation (local)
+pnpm perf:validate
+
 # Build
 pnpm build
 ```
@@ -109,6 +112,16 @@ codexible/
 - **XSS Protection**: Shell script escaping prevents command injection
 - **Security Headers**: CSP, HSTS, X-Frame-Options, and more
 - **Strict TypeScript**: Type-safe code prevents runtime errors
+
+### CSP + Login Troubleshooting
+
+- If login calls to `/api/auth/validate` are blocked by browser policy, verify that `NEXT_PUBLIC_API_URL` points to a valid backend origin and CSP `connect-src` includes that origin.
+- If server-rendered dashboard routes fail inside Docker while browser login works, set `API_INTERNAL_URL` to a container-reachable backend URL (for example `http://backend:3001`).
+- Console messages like `Unchecked runtime.lastError` or `lockdown-install.js` often come from browser extensions and may be unrelated to app code.
+- Prioritize app-owned evidence when debugging:
+  - Network tab request outcome for auth/dashboard API calls
+  - Explicit CSP violation messages (`connect-src`)
+  - Backend health endpoint reachability (`/health`)
 
 ---
 

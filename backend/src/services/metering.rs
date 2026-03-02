@@ -29,9 +29,35 @@ pub async fn record_usage(
     Ok(())
 }
 
+pub async fn enforce_quota_if_enabled(
+    pool: &PgPool,
+    user_id: Uuid,
+    enabled: bool,
+) -> Result<(), AppError> {
+    if !enabled {
+        return Ok(());
+    }
+
+    check_quota(pool, user_id).await
+}
+
+pub async fn record_usage_if_enabled(
+    pool: &PgPool,
+    user_id: Uuid,
+    api_key_id: Uuid,
+    credits: i32,
+    enabled: bool,
+) -> Result<(), AppError> {
+    if !enabled {
+        return Ok(());
+    }
+
+    record_usage(pool, user_id, api_key_id, credits).await
+}
+
 pub async fn check_quota(pool: &PgPool, user_id: Uuid) -> Result<(), AppError> {
     let row: Option<(i32, i32)> = sqlx::query_as(
-        "SELECT COALESCE(SUM(du.credits_used), 0) as used, p.daily_credit_limit
+        "SELECT COALESCE(SUM(du.credits_used), 0)::INT as used, p.daily_credit_limit
          FROM users u
          JOIN plans p ON u.plan_id = p.id
          LEFT JOIN daily_usage du ON du.user_id = u.id AND du.date = CURRENT_DATE
@@ -58,7 +84,7 @@ pub async fn get_today_usage(pool: &PgPool, user_id: Uuid) -> Result<UsageSummar
     let today = Utc::now().date_naive();
 
     let row: Option<(i32, i32)> = sqlx::query_as(
-        "SELECT COALESCE(SUM(credits_used), 0), COALESCE(SUM(request_count), 0)
+        "SELECT COALESCE(SUM(credits_used), 0)::INT, COALESCE(SUM(request_count), 0)::INT
          FROM daily_usage
          WHERE user_id = $1 AND date = CURRENT_DATE",
     )

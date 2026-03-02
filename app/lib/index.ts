@@ -3,8 +3,34 @@ export { MOCK_TOKENS, findToken } from "./mockTokens";
 export type { MockTokenRecord } from "./mockTokens";
 export { translations } from "./i18n/types";
 export type { Lang, Translation, Translations } from "./i18n/types";
-export { validateToken, getDashboardOverview } from "./api";
-export type { UserResponse, ValidateResponse, DashboardOverview } from "./api";
+export {
+  validateToken,
+  getDashboardOverview,
+  listApiKeys,
+  createApiKey,
+  revokeApiKey,
+  rotateApiKey,
+  updateApiKeyLabel,
+  getAdminStatus,
+  getAdminUsers,
+  getAdminTokens,
+  adminCreateToken,
+  adminUpdateToken,
+  adminRevokeToken,
+  adminRotateToken,
+  getAdminLogs,
+} from "./api";
+export type {
+  UserResponse,
+  ValidateResponse,
+  DashboardOverview,
+  ApiKeyItem,
+  ApiKeyCreated,
+  AdminStatus,
+  AdminUser,
+  AdminToken,
+  AdminAuditEvent,
+} from "./api";
 export {
   MOCK_DAILY_USAGE,
   MOCK_MODEL_BREAKDOWN,

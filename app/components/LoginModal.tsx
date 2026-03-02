@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { findToken } from "@/app/lib";
+import { validateToken } from "@/app/lib/api";
 import type { Translation } from "@/app/types";
 
 interface LoginModalProps {
@@ -17,10 +18,16 @@ export function LoginModal({ open, onClose, t }: LoginModalProps) {
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const allowMockFallback = process.env.NEXT_PUBLIC_ENABLE_MOCK_TOKEN_FALLBACK === "true";
+  const connectivityErrorPattern =
+    /cannot reach backend api|content security policy|connect-src|failed to fetch|network error/i;
 
   useEffect(() => {
     if (open) {
+      // Reset transient modal state whenever it is reopened.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setApiKey("");
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setError("");
       setTimeout(() => inputRef.current?.focus(), 100);
     }
@@ -35,19 +42,51 @@ export function LoginModal({ open, onClose, t }: LoginModalProps) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open, onClose]);
 
-  const handleSubmit = () => {
-    const record = findToken(apiKey);
-    if (record) {
-      localStorage.setItem("codexible_token", apiKey);
-      onClose();
-      router.push(`/dashboard?token=${encodeURIComponent(apiKey)}`);
-    } else {
-      setError(t.loginModal.error);
+  const handleSubmit = async () => {
+    setError("");
+
+    try {
+      const result = await validateToken(apiKey);
+      if (result.valid && result.role === "admin") {
+        localStorage.setItem("codexible_token", apiKey);
+        onClose();
+        router.push(`/dashboard/admin?token=${encodeURIComponent(apiKey)}`);
+        return;
+      }
+
+      if (result.valid) {
+        localStorage.setItem("codexible_token", apiKey);
+        onClose();
+        router.push(`/dashboard?token=${encodeURIComponent(apiKey)}`);
+        return;
+      }
+    } catch (error) {
+      if (error instanceof Error && connectivityErrorPattern.test(error.message)) {
+        setError(error.message);
+        return;
+      }
+
+      if (!allowMockFallback) {
+        setError(error instanceof Error ? error.message : t.loginModal.error);
+        return;
+      }
     }
+
+    if (allowMockFallback) {
+      const record = findToken(apiKey);
+      if (record) {
+        localStorage.setItem("codexible_token", apiKey);
+        onClose();
+        router.push(`/dashboard?token=${encodeURIComponent(apiKey)}`);
+        return;
+      }
+    }
+
+    setError(t.loginModal.error);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") handleSubmit();
+    if (e.key === "Enter") void handleSubmit();
   };
 
   if (!open) return null;
@@ -108,7 +147,7 @@ export function LoginModal({ open, onClose, t }: LoginModalProps) {
           </button>
           <button
             type="button"
-            onClick={handleSubmit}
+            onClick={() => void handleSubmit()}
             className="rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
           >
             {t.loginModal.login}

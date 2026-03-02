@@ -9,11 +9,12 @@ interface InsightsGridProps {
 }
 
 export function InsightsGrid({ stats, hourlyData }: InsightsGridProps) {
-  const peakHour = hourlyData.reduce((max, h) =>
-    h.requests > max.requests ? h : max
-  , hourlyData[0]!);
+  const peakHour = hourlyData.length > 0
+    ? hourlyData.reduce((max, h) => (h.requests > max.requests ? h : max))
+    : null;
 
   const avgDailyCost = stats.totalCost / 7;
+  const peakHourValue = peakHour ? `${peakHour.hour}:00` : "N/A";
 
   const metrics = [
     { icon: Activity, label: "Total Requests", value: stats.totalRequests.toLocaleString() },
@@ -21,7 +22,7 @@ export function InsightsGrid({ stats, hourlyData }: InsightsGridProps) {
     { icon: TrendingUp, label: "Avg Daily Cost", value: `$${avgDailyCost.toFixed(2)}` },
     { icon: FileText, label: "Input Tokens", value: `${(stats.promptTokens / 1000).toFixed(0)}K` },
     { icon: FileOutput, label: "Output Tokens", value: `${(stats.completionTokens / 1000).toFixed(0)}K` },
-    { icon: Clock, label: "Peak Hour", value: `${peakHour.hour}:00` },
+    { icon: Clock, label: "Peak Hour", value: peakHourValue },
   ];
 
   return (
