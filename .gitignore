@@ -45,3 +45,7 @@ backend/target/
 *.tsbuildinfo
 next-env.d.ts
 .env*.local
+
+# local credential auth files
+codexsecret/
+**/*:Zone.Identifier
