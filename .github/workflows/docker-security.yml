@@ -1,0 +1,87 @@
+name: Docker Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hadolint:
+    name: Hadolint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Lint frontend Dockerfile
+        run: docker run --rm -i hadolint/hadolint:v2.13.1 hadolint --failure-threshold error - < Dockerfile
+
+      - name: Lint backend Dockerfile
+        run: docker run --rm -i hadolint/hadolint:v2.13.1 hadolint --failure-threshold error - < backend/Dockerfile
+
+  scan-and-sbom:
+    name: Trivy Scan + SBOM
+    runs-on: ubuntu-latest
+    needs: [hadolint]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build frontend image
+        run: docker build -f Dockerfile -t codexible-frontend:ci .
+
+      - name: Build backend image
+        run: docker build -f backend/Dockerfile -t codexible-backend:ci backend
+
+      - name: Trivy scan frontend image (CRITICAL)
+        uses: aquasecurity/trivy-action@0.31.0
+        with:
+          scan-type: image
+          image-ref: codexible-frontend:ci
+          format: table
+          vuln-type: os,library
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - name: Trivy scan backend image (CRITICAL)
+        uses: aquasecurity/trivy-action@0.31.0
+        with:
+          scan-type: image
+          image-ref: codexible-backend:ci
+          format: table
+          vuln-type: os,library
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - name: Generate frontend SBOM (CycloneDX)
+        uses: aquasecurity/trivy-action@0.31.0
+        with:
+          scan-type: image
+          image-ref: codexible-frontend:ci
+          format: cyclonedx
+          output: sbom-frontend.cdx.json
+          exit-code: "0"
+
+      - name: Generate backend SBOM (CycloneDX)
+        uses: aquasecurity/trivy-action@0.31.0
+        with:
+          scan-type: image
+          image-ref: codexible-backend:ci
+          format: cyclonedx
+          output: sbom-backend.cdx.json
+          exit-code: "0"
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-sbom
+          path: |
+            sbom-frontend.cdx.json
+            sbom-backend.cdx.json

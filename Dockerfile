@@ -1,12 +1,12 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1.7
 
-ARG NODE_VERSION=22-alpine
+ARG NODE_VERSION=22.14.0-alpine3.21
 ARG PNPM_VERSION=9.15.5
 
 FROM node:${NODE_VERSION} AS base
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm install -g pnpm@${PNPM_VERSION}
+RUN npm install -g "pnpm@${PNPM_VERSION}"
 
 FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -24,18 +24,35 @@ ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV API_INTERNAL_URL=${API_INTERNAL_URL}
 ENV NEXT_PUBLIC_ENABLE_MOCK_TOKEN_FALLBACK=${NEXT_PUBLIC_ENABLE_MOCK_TOKEN_FALLBACK}
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY next.config.ts postcss.config.mjs tsconfig.json eslint.config.mjs ./
+COPY app ./app
+COPY public ./public
 RUN pnpm run build
 
 FROM node:${NODE_VERSION} AS runner
 WORKDIR /app
+
+ARG BUILD_DATE=unknown
+ARG VCS_REF=unknown
+ARG VERSION=0.1.0
+ARG OCI_SOURCE=https://github.com/zhugez/Codexible
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV HOSTNAME=0.0.0.0
 ENV PORT=10001
 
-RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 --ingroup nodejs nextjs
+LABEL org.opencontainers.image.title="Codexible Frontend" \
+      org.opencontainers.image.description="Next.js frontend for Codexible" \
+      org.opencontainers.image.url="${OCI_SOURCE}" \
+      org.opencontainers.image.source="${OCI_SOURCE}" \
+      org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.revision="${VCS_REF}" \
+      org.opencontainers.image.created="${BUILD_DATE}" \
+      org.opencontainers.image.licenses="UNLICENSED"
+
+RUN addgroup --system --gid 10001 nodejs && adduser --system --uid 10001 --ingroup nodejs nextjs
 
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
@@ -45,4 +62,5 @@ USER nextjs
 
 EXPOSE 10001
 
-CMD ["node", "server.js"]
+ENTRYPOINT ["node"]
+CMD ["server.js"]
