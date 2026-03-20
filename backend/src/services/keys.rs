@@ -14,13 +14,14 @@ pub async fn create_key(
     let label = label.unwrap_or_else(|| "Default".into());
 
     let id: Uuid = sqlx::query_scalar(
-        "INSERT INTO api_keys (user_id, key_prefix, key_hash, label)
-         VALUES ($1, $2, $3, $4)
+        "INSERT INTO api_keys (user_id, key_prefix, key_hash, key_full, label)
+         VALUES ($1, $2, $3, $4, $5)
          RETURNING id",
     )
     .bind(user_id)
     .bind(&generated.prefix)
     .bind(&generated.hash)
+    .bind(&generated.full_key)
     .bind(&label)
     .fetch_one(pool)
     .await?;
@@ -115,4 +116,15 @@ pub async fn rotate_key(
 
     // Create new key with same label
     create_key(pool, user_id, old_label).await
+}
+
+/// Get all active API keys for syncing to CLIProxyAPI
+pub async fn get_all_active_keys(pool: &PgPool) -> Result<Vec<String>, AppError> {
+    let keys: Vec<String> = sqlx::query_scalar(
+        "SELECT key_full FROM api_keys WHERE status = 'active' AND key_full IS NOT NULL",
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(keys)
 }

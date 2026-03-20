@@ -1,0 +1,22 @@
+# CLIProxyAPI Configuration
+# Managed by Codexible - keys are synced from Postgres
+
+port: 8317
+
+# Auth directory (for OAuth credentials if needed)
+auth-dir: /root/.cli-proxy-api
+
+# Management API - Codexible uses this to sync keys
+remote-management:
+  allow-remote: true
+  secret-key: "change-me-in-production"
+
+# Empty API keys array - Codexible will populate this via management API
+api-keys: []
+
+# Optional: Add provider API keys here if you want CLIProxyAPI to proxy LLM requests
+# gemini-api-key:
+#   - api-key: "your-gemini-api-key"
+#     prefix: "gemini"
+
+# debug: true  # Uncomment for debug logging

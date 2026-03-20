@@ -185,6 +185,13 @@ async fn create_token(
     ensure_admin(&auth)?;
 
     let key = keys::create_key(&state.pool, body.user_id, body.label).await?;
+
+    // Sync the new key to CLIProxyAPI
+    if let Err(e) = state.cliproxy.add_key(&key.key).await {
+        tracing::error!(target: "cliproxy_sync", error = %e, "Failed to sync new key to CLIProxyAPI");
+        // Log but don't fail - key is created in Postgres, sync is secondary
+    }
+
     state.audit.record(
         auth.user.email,
         "token.create",
@@ -232,6 +239,15 @@ async fn revoke_token(
 ) -> Result<Json<serde_json::Value>, AppError> {
     ensure_admin(&auth)?;
 
+    // Get the key_full before revoking so we can sync removal
+    let key_full: Option<String> = sqlx::query_scalar(
+        "SELECT key_full FROM api_keys WHERE id = $1 AND status = 'active'",
+    )
+    .bind(key_id)
+    .fetch_optional(&state.pool)
+    .await?
+    .ok_or_else(|| AppError::NotFound("API key not found".into()))?;
+
     let owner_id: Uuid = sqlx::query_scalar("SELECT user_id FROM api_keys WHERE id = $1")
         .bind(key_id)
         .fetch_optional(&state.pool)
@@ -239,6 +255,15 @@ async fn revoke_token(
         .ok_or_else(|| AppError::NotFound("API key not found".into()))?;
 
     keys::revoke_key(&state.pool, owner_id, key_id).await?;
+
+    // Sync the key removal to CLIProxyAPI
+    if let Some(key) = key_full {
+        if let Err(e) = state.cliproxy.remove_key(&key).await {
+            tracing::error!(target: "cliproxy_sync", error = %e, "Failed to remove key from CLIProxyAPI");
+            // Log but don't fail - key is revoked in Postgres
+        }
+    }
+
     state.audit.record(
         auth.user.email,
         "token.revoke",
@@ -262,7 +287,28 @@ async fn rotate_token(
         .await?
         .ok_or_else(|| AppError::NotFound("API key not found".into()))?;
 
+    // Get the old key before revoking
+    let old_key_full: Option<String> = sqlx::query_scalar(
+        "SELECT key_full FROM api_keys WHERE id = $1 AND status = 'active'",
+    )
+    .bind(key_id)
+    .fetch_optional(&state.pool)
+    .await?;
+
     let new_key = keys::rotate_key(&state.pool, owner_id, key_id).await?;
+
+    // Remove old key from CLIProxyAPI
+    if let Some(old_key) = old_key_full {
+        if let Err(e) = state.cliproxy.remove_key(&old_key).await {
+            tracing::error!(target: "cliproxy_sync", error = %e, "Failed to remove old key during rotation");
+        }
+    }
+
+    // Add new key to CLIProxyAPI
+    if let Err(e) = state.cliproxy.add_key(&new_key.key).await {
+        tracing::error!(target: "cliproxy_sync", error = %e, "Failed to add new key during rotation");
+    }
+
     state.audit.record(
         auth.user.email,
         "token.rotate",

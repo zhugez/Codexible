@@ -199,6 +199,160 @@ impl CliProxyClient {
 
         map_management_response(response).await
     }
+
+    /// Sync all API keys to CLIProxyAPI - replaces all keys
+    pub async fn sync_all_keys(&self, keys: &[String]) -> Result<(), AppError> {
+        if !self.enabled {
+            return Ok(());
+        }
+
+        let key = self.management_key.as_ref().ok_or_else(|| {
+            AppError::BadRequest("Management key is not configured".into())
+        })?;
+
+        let url = build_management_url(&self.management_url, "api-keys");
+        let response = self
+            .client
+            .put(url)
+            .bearer_auth(key)
+            .json(keys)
+            .send()
+            .await
+            .map_err(|err| {
+                tracing::error!(
+                    target: "integration.cliproxy",
+                    event = "sync_keys_failed",
+                    error = %err
+                );
+                AppError::ServiceUnavailable(format!("Failed to sync keys to CLIProxyAPI: {err}"))
+            })?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
+            tracing::error!(
+                target: "integration.cliproxy",
+                event = "sync_keys_failed",
+                status = status.as_u16(),
+                body = %body
+            );
+            return Err(AppError::ServiceUnavailable(format!(
+                "CLIProxyAPI sync failed with status {}",
+                status.as_u16()
+            )));
+        }
+
+        tracing::info!(
+            target: "integration.cliproxy",
+            event = "sync_keys_success",
+            key_count = keys.len()
+        );
+
+        Ok(())
+    }
+
+    /// Add a single API key to CLIProxyAPI
+    pub async fn add_key(&self, key: &str) -> Result<(), AppError> {
+        if !self.enabled {
+            return Ok(());
+        }
+
+        let mgmt_key = self.management_key.as_ref().ok_or_else(|| {
+            AppError::BadRequest("Management key is not configured".into())
+        })?;
+
+        // Use PATCH to add a key - the API expects {"new": "key-value"}
+        let url = build_management_url(&self.management_url, "api-keys");
+        let payload = serde_json::json!({ "new": key });
+        let response = self
+            .client
+            .patch(url)
+            .bearer_auth(mgmt_key)
+            .json(&payload)
+            .send()
+            .await
+            .map_err(|err| {
+                tracing::error!(
+                    target: "integration.cliproxy",
+                    event = "add_key_failed",
+                    error = %err
+                );
+                AppError::ServiceUnavailable(format!("Failed to add key to CLIProxyAPI: {err}"))
+            })?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
+            tracing::error!(
+                target: "integration.cliproxy",
+                event = "add_key_failed",
+                status = status.as_u16(),
+                body = %body
+            );
+            return Err(AppError::ServiceUnavailable(format!(
+                "CLIProxyAPI add key failed with status {}",
+                status.as_u16()
+            )));
+        }
+
+        tracing::info!(
+            target: "integration.cliproxy",
+            event = "add_key_success",
+            key_prefix = &key[..key.len().min(8)]
+        );
+
+        Ok(())
+    }
+
+    /// Remove an API key from CLIProxyAPI
+    pub async fn remove_key(&self, key: &str) -> Result<(), AppError> {
+        if !self.enabled {
+            return Ok(());
+        }
+
+        let mgmt_key = self.management_key.as_ref().ok_or_else(|| {
+            AppError::BadRequest("Management key is not configured".into())
+        })?;
+
+        let url = build_management_url(&self.management_url, &format!("api-keys?value={}", urlencoding::encode(key)));
+        let response = self
+            .client
+            .delete(url)
+            .bearer_auth(mgmt_key)
+            .send()
+            .await
+            .map_err(|err| {
+                tracing::error!(
+                    target: "integration.cliproxy",
+                    event = "remove_key_failed",
+                    error = %err
+                );
+                AppError::ServiceUnavailable(format!("Failed to remove key from CLIProxyAPI: {err}"))
+            })?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
+            tracing::error!(
+                target: "integration.cliproxy",
+                event = "remove_key_failed",
+                status = status.as_u16(),
+                body = %body
+            );
+            return Err(AppError::ServiceUnavailable(format!(
+                "CLIProxyAPI remove key failed with status {}",
+                status.as_u16()
+            )));
+        }
+
+        tracing::info!(
+            target: "integration.cliproxy",
+            event = "remove_key_success",
+            key_prefix = &key[..key.len().min(8)]
+        );
+
+        Ok(())
+    }
 }
 
 fn normalize_base_url(url: &str) -> String {

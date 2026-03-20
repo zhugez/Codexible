@@ -49,3 +49,8 @@ next-env.d.ts
 # local credential auth files
 codexsecret/
 **/*:Zone.Identifier
+
+# CLI proxy local runtime secrets and logs
+cli-proxy-api/auths/*.json
+cli-proxy-api/logs/
+cli-proxy-api/*.bak

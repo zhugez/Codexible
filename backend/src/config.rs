@@ -105,7 +105,7 @@ struct CredentialBundle {
 
 #[derive(Debug, Deserialize)]
 struct CodexCredentialFile {
-    access_token: String,
+    access_token: Option<String>,
 }
 
 fn load_credential_bundle(dir: &str) -> Result<CredentialBundle, String> {
@@ -117,10 +117,15 @@ fn load_credential_bundle(dir: &str) -> Result<CredentialBundle, String> {
         return Err(format!("credential path is not a directory: {dir}"));
     }
 
+    let mut entries = fs::read_dir(dir_path)
+        .map_err(|e| format!("failed reading credential dir: {e}"))?
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|e| format!("failed reading credential entry: {e}"))?;
+    entries.sort_by_key(|entry| entry.file_name());
+
     let mut tokens: Vec<String> = Vec::new();
 
-    for entry in fs::read_dir(dir_path).map_err(|e| format!("failed reading credential dir: {e}"))? {
-        let entry = entry.map_err(|e| format!("failed reading credential entry: {e}"))?;
+    for entry in entries {
         let path = entry.path();
         if !path.is_file() {
             continue;
@@ -140,7 +145,7 @@ fn load_credential_bundle(dir: &str) -> Result<CredentialBundle, String> {
         let parsed: CodexCredentialFile = serde_json::from_str(&raw)
             .map_err(|e| format!("invalid JSON in credential file {file_name}: {e}"))?;
 
-        let token = parsed.access_token.trim();
+        let token = parsed.access_token.as_deref().map(str::trim).unwrap_or("");
         if token.is_empty() {
             return Err(format!(
                 "credential file {file_name} missing non-empty `access_token`"

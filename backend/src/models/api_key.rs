@@ -9,6 +9,7 @@ pub struct ApiKey {
     pub user_id: Uuid,
     pub key_prefix: String,
     pub key_hash: String,
+    pub key_full: Option<String>,
     pub label: String,
     pub status: String,
     pub last_used_at: Option<DateTime<Utc>>,

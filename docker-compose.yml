@@ -1,4 +1,19 @@
 services:
+  # ── CLIProxyAPI (LLM Proxy) ─────────────────────────
+  cliproxyapi:
+    image: eceasy/cli-proxy-api:latest
+    pull_policy: always
+    ports:
+      - "8317:8317"
+    volumes:
+      - ./cli-proxy-api/config.yaml:/CLIProxyAPI/config.yaml:ro
+      - ./cli-proxy-api/auths:/root/.cli-proxy-api
+      - ./cli-proxy-api/logs:/CLIProxyAPI/logs
+    environment:
+      - DEPLOY=production
+      - CLIPROXY_MANAGEMENT_KEY=${CLIPROXY_MANAGEMENT_KEY:-change-me-in-production}
+    restart: unless-stopped
+
   # ── Frontend (Next.js) ──────────────────────────────
   frontend:
     build:
@@ -68,14 +83,14 @@ services:
       - ALLOWED_ORIGINS=http://localhost:10001,http://127.0.0.1:10001
       - API_KEY_HMAC_SECRET=dev_only_change_me_in_production_64chars_placeholder_string
       - CLIPROXY_INTEGRATION_ENABLED=true
-      - CLIPROXY_UPSTREAM_URL=http://host.docker.internal:8317
-      - CLIPROXY_MANAGEMENT_URL=http://host.docker.internal:8317/v0/management
-      - CLIPROXY_MANAGEMENT_KEY=
+      - CLIPROXY_UPSTREAM_URL=http://cliproxyapi:8317
+      - CLIPROXY_MANAGEMENT_URL=http://cliproxyapi:8317/v0/management
+      - CLIPROXY_MANAGEMENT_KEY=change-me-in-production
       - CLIPROXY_CREDENTIALS_DIR=/app/codexsecret
       - CLIPROXY_TIMEOUT_MS=8000
       - CLIPROXY_DEFAULT_DAILY_LIMIT=1000
       - ADMIN_EMAILS=team@codexible.me
-      - CLIPROXY_ADMIN_TOKENS=
+      - CLIPROXY_ADMIN_TOKENS=sk-test-admin-token
       - ADMIN_LOG_MAX_ENTRIES=500
     volumes:
       - ./codexsecret:/app/codexsecret:ro
@@ -100,6 +115,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      cliproxyapi:
+        condition: service_started
     restart: unless-stopped
 
   # ── PostgreSQL ──────────────────────────────────────

@@ -46,6 +46,9 @@ hex = "0.4"
 thiserror = "2"
 anyhow = "1"
 
+# URL encoding
+urlencoding = "2"
+
 [dev-dependencies]
 tokio = { version = "1", features = ["full", "test-util"] }
 
