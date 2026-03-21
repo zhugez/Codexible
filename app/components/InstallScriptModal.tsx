@@ -72,7 +72,7 @@ export function InstallScriptModal({ open, onClose, scriptText }: Props) {
         <div className="px-5 py-4">
           <div className="mb-3 text-xs text-[var(--text-muted)]">{statusText}</div>
 
-          <pre className="max-h-[68vh] overflow-auto rounded-xl border border-[var(--border)] bg-[var(--bg-code)] p-4 text-xs text-[#8de0ff]">
+          <pre className="max-h-[68vh] overflow-auto rounded-xl border border-[var(--border)] bg-[var(--bg-code)] p-4 text-xs text-[var(--text-code)]">
             <code>{scriptText || "(empty)"}</code>
           </pre>
         </div>
