@@ -32,11 +32,11 @@ export function CopyButton({
 
   const icon =
     state === "success" ? (
-      <Check className="h-4 w-4" aria-hidden="true" />
+      <Check className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
     ) : state === "error" ? (
-      <X className="h-4 w-4" aria-hidden="true" />
+      <X className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
     ) : (
-      <Copy className="h-4 w-4" aria-hidden="true" />
+      <Copy className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
     );
 
   const labelText =
