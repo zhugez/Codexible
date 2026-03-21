@@ -6,44 +6,49 @@ interface PricingSectionProps {
 }
 
 /**
- * Single pricing card component
+ * Pricing card — left-aligned content, accent CTA, no decorative icons.
+ * Uses CSS variables for all colors. Focus ring matches border-radius.
  */
 function PricingCard({ plan, t }: { plan: Plan; t: Translation }) {
-  const isHighlighted = plan.highlight;
+  const featured = plan.highlight;
 
   return (
     <article
-      className={`rounded-2xl border p-6 transition-shadow hover:shadow-lg ${
-        isHighlighted
-          ? "border-[var(--accent)] bg-[var(--accent-light)] shadow-[0_16px_40px_rgba(224,122,69,.14)]"
-          : "border-[var(--border)] bg-[var(--bg-primary)] shadow-[0_10px_28px_rgba(15,23,42,.05)]"
-      }`}
+      className={`
+        relative rounded-2xl border p-6 md:p-8
+        transition-shadow duration-normal
+        ${featured
+          ? "border-[var(--accent)] bg-[var(--accent-light)] shadow-lg"
+          : "border-[var(--border)] bg-[var(--bg-primary)]"
+        }
+      `}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="text-xl font-bold text-[var(--text-primary)]">{plan.name}</h3>
-        {isHighlighted && (
-          <span className="rounded-full border border-[#f2d0bf] bg-[var(--accent-light)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#b86539]">
-            {t.mostPopular}
-          </span>
-        )}
-      </div>
+      {/* Featured badge */}
+      {featured && (
+        <div className="absolute -top-3 left-6 rounded-full border border-[var(--accent)] bg-[var(--accent)] px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white shadow-sm">
+          {t.mostPopular}
+        </div>
+      )}
+
+      {/* Plan name */}
+      <h3 className="text-xl font-bold text-[var(--text-primary)]">{plan.name}</h3>
 
       {/* Price */}
       <div className="mt-3 flex items-end gap-1">
-        <span className="text-3xl font-bold text-[var(--text-primary)]">{plan.price}</span>
-        <span className="pb-1 text-sm text-[var(--text-muted)]">{t.period}</span>
+        <span className="text-3xl font-bold tabular-nums text-[var(--text-primary)]">{plan.price}</span>
+        <span className="pb-0.5 text-sm text-[var(--text-muted)]">{t.period}</span>
       </div>
 
       {/* Description */}
       <p className="mt-2 text-sm text-[var(--text-muted)]">{plan.description}</p>
 
-      {/* Features */}
-      <ul className="mt-5 space-y-2">
+      {/* Feature list */}
+      <ul className="mt-5 space-y-2.5">
         {plan.points.map((point) => (
-          <li key={point} className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+          <li key={point} className="flex items-start gap-2.5 text-sm text-[var(--text-secondary)]">
             <BadgeCheck
-              className="h-4 w-4 flex-shrink-0 text-[var(--accent)]"
+              className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)]"
+              strokeWidth={2.5}
               aria-hidden="true"
             />
             {point}
@@ -54,11 +59,15 @@ function PricingCard({ plan, t }: { plan: Plan; t: Translation }) {
       {/* CTA */}
       <a
         href="#"
-        className={`mt-6 inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-          isHighlighted
-            ? "bg-[var(--accent)] text-white hover:opacity-90 focus:ring-[var(--accent)]"
-            : "border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] focus:ring-[var(--border)]"
-        }`}
+        className={`
+          mt-6 flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold
+          transition-all duration-fast
+          focus:outline-none focus:ring-2 focus:ring-offset-2
+          ${featured
+            ? "bg-[var(--accent)] text-white shadow-sm hover:bg-[var(--accent-hover)] hover:-translate-y-px hover:shadow-md focus:ring-[var(--accent)] active:translate-y-0"
+            : "border border-[var(--border)] text-[var(--text-primary)] hover:border-[var(--border-strong)] hover:bg-[var(--bg-secondary)] focus:ring-[var(--border-strong)]"
+          }
+        `}
       >
         {plan.cta}
       </a>
@@ -67,39 +76,40 @@ function PricingCard({ plan, t }: { plan: Plan; t: Translation }) {
 }
 
 /**
- * Pricing section with plan cards
+ * Pricing section — 3-column on desktop, no decorative elements.
+ * Centered header, left-aligned cards.
  */
 export function PricingSection({ t }: PricingSectionProps) {
   return (
     <section
       id="pricing"
-      className="mx-auto max-w-6xl px-5 py-14 md:px-6 md:py-20"
+      className="mx-auto max-w-6xl px-5 py-16 md:px-6 md:py-24"
       aria-labelledby="pricing-heading"
     >
-      {/* Section Header */}
-      <div className="text-center">
-        <p className="text-sm font-semibold uppercase tracking-wider text-[#b86539]">
+      {/* Section header */}
+      <div className="mb-10 text-center md:mb-14">
+        <p className="text-sm font-semibold uppercase tracking-widest text-[var(--accent)]">
           {t.pricingLabel}
         </p>
         <h2
           id="pricing-heading"
-          className="mt-2 text-3xl font-bold text-[var(--text-primary)] md:text-5xl"
+          className="mt-2 text-3xl font-bold tracking-tight text-[var(--text-primary)] md:text-4xl lg:text-5xl"
         >
           {t.pricingTitle}
         </h2>
-        <p className="mx-auto mt-3 max-w-2xl text-sm text-[var(--text-muted)] md:text-base">
+        <p className="mx-auto mt-3 max-w-[52ch] text-sm text-[var(--text-muted)] md:text-base">
           {t.pricingSubtitle}
         </p>
       </div>
 
-      {/* Pricing Cards */}
-      <div className="mt-10 grid gap-4 md:grid-cols-3">
+      {/* Pricing cards */}
+      <div className="grid gap-4 md:grid-cols-3 md:gap-6">
         {t.plans.map((plan) => (
           <PricingCard key={plan.name} plan={plan} t={t} />
         ))}
       </div>
 
-      {/* Notes */}
+      {/* Plan notes */}
       <div className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] p-5 md:p-6">
         <p className="text-sm font-semibold text-[var(--text-primary)]">
           {t.pricingNotesTitle}
@@ -108,10 +118,11 @@ export function PricingSection({ t }: PricingSectionProps) {
           {t.pricingNotes.map((note) => (
             <li
               key={note}
-              className="flex items-center gap-2 text-sm text-[var(--text-secondary)]"
+              className="flex items-start gap-2.5 text-sm text-[var(--text-secondary)]"
             >
               <BadgeCheck
-                className="h-4 w-4 flex-shrink-0 text-[var(--accent)]"
+                className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)]"
+                strokeWidth={2.5}
                 aria-hidden="true"
               />
               {note}

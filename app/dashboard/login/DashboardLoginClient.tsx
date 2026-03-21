@@ -75,38 +75,54 @@ export default function DashboardLoginClient() {
   };
 
   return (
-    <main className="mx-auto flex min-h-[70vh] w-full max-w-lg items-center px-5 py-12 md:px-6">
-      <div className="w-full rounded-3xl border border-[#e8ecf1] bg-white p-7 shadow-[0_20px_50px_rgba(15,23,42,.06)] md:p-10">
-        <h1 className="text-2xl font-bold text-black md:text-3xl">Dashboard Login</h1>
-        <p className="mt-2 text-sm text-[#475467]">
+    <main className="mx-auto flex min-h-[70vh] w-full max-w-md items-center px-5 py-12 md:px-6">
+      <div className="w-full rounded-2xl border border-[var(--border)] bg-[var(--bg-primary)] p-7 shadow-lg md:p-10">
+        <h1 className="text-2xl font-bold text-[var(--text-primary)] md:text-3xl">
+          Dashboard Login
+        </h1>
+        <p className="mt-2 text-sm text-[var(--text-secondary)]">
           Enter your API token to access the dashboard.
         </p>
 
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>
-          <label className="block text-sm font-medium text-[#111827]">
+          <label className="block text-sm font-medium text-[var(--text-primary)]">
             API Token
             <input
+              type="text"
               value={token}
               onChange={(e) => setToken(e.target.value)}
               placeholder="codexible_demo_pro_2026"
-              className="mt-2 w-full rounded-xl border border-[#d7dee7] px-4 py-3 text-sm outline-none transition focus:border-[#e07a45] focus:ring-2 focus:ring-[#f2d0bf]"
+              className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--bg-primary)] px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
+              aria-describedby={error ? "login-error" : undefined}
             />
           </label>
 
-          {error && <p className="text-sm text-[#b42318]">{error}</p>}
+          {error && (
+            <p
+              id="login-error"
+              role="alert"
+              className="text-sm font-medium text-[var(--red)]"
+            >
+              {error}
+            </p>
+          )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-[#e07a45] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+            className="w-full rounded-xl bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-px hover:bg-[var(--accent-hover)] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 active:translate-y-0"
           >
             {loading ? "Verifying..." : "Enter Dashboard"}
           </button>
         </form>
 
         {ENABLE_MOCK_FALLBACK && (
-          <p className="mt-4 text-xs text-[#667085]">
-            Demo tokens are listed on the <a className="underline" href="/docs">docs page</a>.
+          <p className="mt-4 text-xs text-[var(--text-muted)]">
+            Demo tokens are listed on the{" "}
+            <a href="/docs" className="underline underline-offset-2 hover:text-[var(--accent)]">
+              docs page
+            </a>
+            .
           </p>
         )}
       </div>
