@@ -25,7 +25,7 @@ export function TrustSection({ t }: TrustSectionProps) {
     >
       <h2 id="trust-heading" className="sr-only">Trust Indicators</h2>
       <div className="mx-auto grid max-w-6xl divide-y divide-[var(--border)] px-5 md:grid-cols-3 md:divide-x md:divide-y-0 md:px-6">
-        {metrics.map(([value, label], index) => (
+        {metrics.map(([value, label]) => (
           <div
             key={label}
             className="flex items-center justify-between gap-4 py-6 md:flex-col md:justify-center md:py-10"
