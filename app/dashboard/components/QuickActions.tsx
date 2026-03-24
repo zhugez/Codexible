@@ -23,7 +23,7 @@ export function QuickActions({ token }: QuickActionsProps) {
     { icon: Clipboard, label: "Copy ENV Config", onClick: () => copy(envConfig) },
     { icon: Settings, label: "Copy Settings", onClick: () => copy(settingsConfig) },
     { icon: FileText, label: "View Docs", href: "/docs" },
-    { icon: MessageCircle, label: "Contact Support", href: "https://t.me/codexible" },
+    { icon: MessageCircle, label: "Contact Support", href: "https://t.me/dezzhu" },
   ];
 
   return (

@@ -27,7 +27,7 @@ export function CtaSection({ t, onOpenLogin }: CtaSectionProps) {
             {t.ctaSection.primaryCta}
           </button>
           <a
-            href="https://t.me/codexible"
+            href="https://t.me/dezzhu"
             target="_blank"
             rel="noopener noreferrer"
             className="rounded-xl border border-[var(--border)] bg-[var(--bg-primary)] px-6 py-3 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--bg-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--border)] focus:ring-offset-2"
