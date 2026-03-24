@@ -3,6 +3,7 @@ use std::fs;
 use std::path::Path;
 
 use serde::Deserialize;
+use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
 pub struct Config {
@@ -22,6 +23,9 @@ pub struct Config {
     pub cliproxy_management_key: Option<String>,
     pub cliproxy_timeout_ms: u64,
     pub cliproxy_default_daily_limit: i32,
+    pub proxy_cost_prompt_per_1k: f64,
+    pub proxy_cost_completion_per_1k: f64,
+    pub proxy_model_rates: HashMap<String, ModelRate>,
     pub admin_emails: Vec<String>,
     pub cliproxy_admin_tokens: Vec<String>,
     pub admin_log_max_entries: usize,
@@ -83,6 +87,15 @@ impl Config {
                 .unwrap_or_else(|_| "1000".into())
                 .parse()
                 .expect("CLIPROXY_DEFAULT_DAILY_LIMIT must be a number"),
+            proxy_cost_prompt_per_1k: env::var("CLIPROXY_PROXY_COST_PROMPT_PER_1K")
+                .unwrap_or_else(|_| "0.03".into())
+                .parse()
+                .expect("CLIPROXY_PROXY_COST_PROMPT_PER_1K must be a number"),
+            proxy_cost_completion_per_1k: env::var("CLIPROXY_PROXY_COST_COMPLETION_PER_1K")
+                .unwrap_or_else(|_| "0.06".into())
+                .parse()
+                .expect("CLIPROXY_PROXY_COST_COMPLETION_PER_1K must be a number"),
+            proxy_model_rates: parse_proxy_model_rates(),
             admin_emails: read_list_env("ADMIN_EMAILS"),
             cliproxy_admin_tokens,
             admin_log_max_entries: env::var("ADMIN_LOG_MAX_ENTRIES")
@@ -95,6 +108,12 @@ impl Config {
     pub fn bind_addr(&self) -> String {
         format!("{}:{}", self.host, self.port)
     }
+}
+
+#[derive(Debug, Clone)]
+pub struct ModelRate {
+    pub prompt_per_1k: f64,
+    pub completion_per_1k: f64,
 }
 
 #[derive(Debug, Clone)]
@@ -196,6 +215,38 @@ fn read_list_env(key: &str) -> Vec<String> {
             .collect(),
         Err(_) => Vec::new(),
     }
+}
+
+fn parse_proxy_model_rates() -> HashMap<String, ModelRate> {
+    let json_str = match env::var("CLIPROXY_PROXY_MODEL_RATES_JSON") {
+        Ok(v) if !v.trim().is_empty() => v,
+        _ => return HashMap::new(),
+    };
+
+    #[derive(Deserialize)]
+    struct RawRate {
+        prompt_per_1k: f64,
+        completion_per_1k: f64,
+    }
+
+    let raw: HashMap<String, RawRate> = serde_json::from_str(&json_str).unwrap_or_else(|e| {
+        panic!(
+            "CLIPROXY_PROXY_MODEL_RATES_JSON is invalid JSON: {e}. \
+             Expected: {{\"model-name\": {{\"prompt_per_1k\": 0.005, \"completion_per_1k\": 0.015}}}}"
+        )
+    });
+
+    raw.into_iter()
+        .map(|(k, v)| {
+            (
+                k,
+                ModelRate {
+                    prompt_per_1k: v.prompt_per_1k,
+                    completion_per_1k: v.completion_per_1k,
+                },
+            )
+        })
+        .collect()
 }
 
 #[cfg(test)]

@@ -30,6 +30,7 @@ pub struct AuthContext {
     pub role: String,
     pub session_source: String,
     pub token_prefix: String,
+    pub raw_token: String,
 }
 
 impl FromRequestParts<AppState> for AuthContext {
@@ -47,6 +48,7 @@ impl FromRequestParts<AppState> for AuthContext {
                 user,
                 api_key_id: Some(api_key.id),
                 session_source: "local".into(),
+                raw_token: token.clone(),
             }),
             Err(local_error) => {
                 if !state.config.cliproxy_integration_enabled {
@@ -63,6 +65,7 @@ impl FromRequestParts<AppState> for AuthContext {
                     role,
                     session_source: "cliproxy".into(),
                     token_prefix,
+                    raw_token: token.clone(),
                 })
             }
         }

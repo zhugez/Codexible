@@ -1,12 +1,12 @@
 use axum::extract::{Query, State};
 use axum::{routing::get, Json, Router};
-use chrono::Utc;
+use chrono::{NaiveDate, Utc};
 use serde::Deserialize;
 
 use crate::app::AppState;
 use crate::error::AppError;
 use crate::extractors::auth::AuthContext;
-use crate::models::usage::{UsageHistoryEntry, UsageSummary};
+use crate::models::usage::{HourlyEntry, ModelBreakdownEntry, RequestLogEntry, UsageHistoryEntry, UsageSummary};
 use crate::services::metering;
 
 async fn today(
@@ -83,8 +83,81 @@ async fn history(
     Ok(Json(history))
 }
 
+#[derive(Deserialize)]
+struct DetailedParams {
+    days: Option<i32>,
+    limit: Option<i32>,
+    offset: Option<i32>,
+}
+
+#[derive(Deserialize)]
+struct ModelsParams {
+    days: Option<i32>,
+}
+
+#[derive(Deserialize)]
+struct HourlyParams {
+    date: Option<String>,
+}
+
+async fn detailed(
+    State(state): State<AppState>,
+    auth: AuthContext,
+    Query(params): Query<DetailedParams>,
+) -> Result<Json<Vec<RequestLogEntry>>, AppError> {
+    if auth.session_source == "cliproxy" {
+        return Ok(Json(Vec::new()));
+    }
+
+    let days = params.days.unwrap_or(30).min(90);
+    let limit = params.limit.unwrap_or(100).min(500);
+    let offset = params.offset.unwrap_or(0).max(0);
+
+    let entries = metering::get_detailed_usage(&state.pool, auth.user.id, days, limit, offset).await?;
+
+    Ok(Json(entries))
+}
+
+async fn models(
+    State(state): State<AppState>,
+    auth: AuthContext,
+    Query(params): Query<ModelsParams>,
+) -> Result<Json<Vec<ModelBreakdownEntry>>, AppError> {
+    if auth.session_source == "cliproxy" {
+        return Ok(Json(Vec::new()));
+    }
+
+    let days = params.days.unwrap_or(30).min(90);
+    let breakdown = metering::get_model_breakdown(&state.pool, auth.user.id, days).await?;
+
+    Ok(Json(breakdown))
+}
+
+async fn hourly(
+    State(state): State<AppState>,
+    auth: AuthContext,
+    Query(params): Query<HourlyParams>,
+) -> Result<Json<Vec<HourlyEntry>>, AppError> {
+    if auth.session_source == "cliproxy" {
+        return Ok(Json(Vec::new()));
+    }
+
+    let date = params
+        .date
+        .as_ref()
+        .and_then(|s| NaiveDate::parse_from_str(s, "%Y-%m-%d").ok())
+        .unwrap_or_else(|| Utc::now().date_naive());
+
+    let entries = metering::get_hourly_usage(&state.pool, auth.user.id, date).await?;
+
+    Ok(Json(entries))
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/usage/today", get(today))
         .route("/api/usage/history", get(history))
+        .route("/api/usage/detailed", get(detailed))
+        .route("/api/usage/models", get(models))
+        .route("/api/usage/hourly", get(hourly))
 }

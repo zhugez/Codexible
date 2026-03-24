@@ -1,5 +1,3 @@
-import { MOCK_TOKENS } from "@/app/lib";
-
 export default function DocsPage() {
   return (
     <main className="mx-auto max-w-5xl px-5 py-12 md:px-6">
@@ -37,22 +35,7 @@ export CODEXIBLE_API_KEY="YOUR_KEY"`}
       </section>
 
       <section className="mt-6 rounded-2xl border border-[#e8ecf1] bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-black">4. Demo Tokens (Hardcoded JSON)</h2>
-        <div className="mt-4 space-y-3">
-          {MOCK_TOKENS.map((item) => (
-            <div key={item.token} className="rounded-xl border border-[#eef2f6] p-4">
-              <p className="text-sm font-semibold text-black">{item.owner}</p>
-              <p className="mt-1 text-xs text-[#667085]">Plan: {item.plan} • Limit: {item.dailyLimit}/day</p>
-              <code className="mt-2 block overflow-auto rounded-lg bg-[#0b1020] p-3 text-xs text-[#8de0ff]">
-                {item.token}
-              </code>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="mt-6 rounded-2xl border border-[#e8ecf1] bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-black">5. Troubleshooting Login Console Errors</h2>
+        <h2 className="text-xl font-semibold text-black">4. Troubleshooting Login Console Errors</h2>
         <div className="mt-3 space-y-3 text-sm text-[#475467]">
           <p>
             <strong>App-owned errors (need fixing):</strong> CSP violations such as

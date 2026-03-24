@@ -32,8 +32,6 @@ interface DashboardLayoutProps {
   tabs?: React.ReactNode;
 }
 
-const LANGUAGE_STORAGE_KEY = "codexible_lang";
-
 export function DashboardLayout({
   children,
   accountData,

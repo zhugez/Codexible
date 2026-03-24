@@ -3,8 +3,9 @@ import { describe, expect, it } from "vitest";
 
 import { ActivityHeatmap } from "../ActivityHeatmap";
 import { InsightsGrid } from "../InsightsGrid";
+import type { DashboardStats } from "@/app/lib/api";
 
-const baseStats = {
+const baseStats: DashboardStats = {
   totalRequests: 100,
   totalCost: 12.5,
   promptTokens: 120000,

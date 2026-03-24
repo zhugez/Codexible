@@ -3,4 +3,5 @@ pub mod auth;
 pub mod dashboard;
 pub mod health;
 pub mod keys;
+pub mod proxy;
 pub mod usage;

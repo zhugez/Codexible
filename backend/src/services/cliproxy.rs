@@ -74,7 +74,7 @@ impl CliProxyClient {
             .await
             .map_err(|err| {
                 tracing::warn!(
-                    target: "integration.cliproxy",
+                    target = "integration.cliproxy",
                     event = "token_validation_error",
                     duration_ms = started.elapsed().as_secs_f64() * 1000.0,
                     error = %err
@@ -87,7 +87,7 @@ impl CliProxyClient {
 
         if status.is_success() {
             tracing::info!(
-                target: "integration.cliproxy",
+                target = "integration.cliproxy",
                 event = "token_validation_success",
                 status = status.as_u16(),
                 duration_ms
@@ -96,7 +96,7 @@ impl CliProxyClient {
         }
 
         tracing::warn!(
-            target: "integration.cliproxy",
+            target = "integration.cliproxy",
             event = "token_validation_failed",
             status = status.as_u16(),
             duration_ms
@@ -107,7 +107,9 @@ impl CliProxyClient {
                 Err(AppError::Unauthorized("Invalid CLIProxyAPI token".into()))
             }
             StatusCode::TOO_MANY_REQUESTS => {
-                Err(AppError::ServiceUnavailable("CLIProxyAPI rate limited validation requests".into()))
+                Err(AppError::ServiceUnavailable(
+                    "CLIProxyAPI rate limited validation requests".into(),
+                ))
             }
             _ => Err(AppError::ServiceUnavailable(
                 "CLIProxyAPI token validation failed temporarily".into(),
@@ -129,30 +131,38 @@ impl CliProxyClient {
 
         let mut last_error: Option<String> = None;
 
-        let upstream_reachable = match self.client.get(format!("{}/v1/models", self.upstream_url)).send().await {
-            Ok(response) => !response.status().is_server_error(),
-            Err(err) => {
-                last_error = Some(format!("upstream: {err}"));
-                false
-            }
-        };
-
-        let management_reachable = match &self.management_key {
-            Some(key) => match self
+        let upstream_reachable =
+            match self
                 .client
-                .get(self.management_url.clone())
-                .bearer_auth(key)
+                .get(format!("{}/v1/models", self.upstream_url))
                 .send()
                 .await
             {
                 Ok(response) => !response.status().is_server_error(),
                 Err(err) => {
-                    if last_error.is_none() {
-                        last_error = Some(format!("management: {err}"));
-                    }
+                    last_error = Some(format!("upstream: {err}"));
                     false
                 }
-            },
+            };
+
+        let management_reachable = match &self.management_key {
+            Some(key) => {
+                match self
+                    .client
+                    .get(self.management_url.clone())
+                    .bearer_auth(key)
+                    .send()
+                    .await
+                {
+                    Ok(response) => !response.status().is_server_error(),
+                    Err(err) => {
+                        if last_error.is_none() {
+                            last_error = Some(format!("management: {err}"));
+                        }
+                        false
+                    }
+                }
+            }
             None => {
                 if last_error.is_none() {
                     last_error = Some("management key is not configured".into());
@@ -177,7 +187,9 @@ impl CliProxyClient {
         query: &[(&str, &str)],
     ) -> Result<Value, AppError> {
         if !self.enabled {
-            return Err(AppError::BadRequest("CLIProxyAPI integration is disabled".into()));
+            return Err(AppError::BadRequest(
+                "CLIProxyAPI integration is disabled".into(),
+            ));
         }
 
         let key = self
@@ -206,9 +218,10 @@ impl CliProxyClient {
             return Ok(());
         }
 
-        let key = self.management_key.as_ref().ok_or_else(|| {
-            AppError::BadRequest("Management key is not configured".into())
-        })?;
+        let key = self
+            .management_key
+            .as_ref()
+            .ok_or_else(|| AppError::BadRequest("Management key is not configured".into()))?;
 
         let url = build_management_url(&self.management_url, "api-keys");
         let response = self
@@ -220,18 +233,20 @@ impl CliProxyClient {
             .await
             .map_err(|err| {
                 tracing::error!(
-                    target: "integration.cliproxy",
+                    target = "integration.cliproxy",
                     event = "sync_keys_failed",
                     error = %err
                 );
-                AppError::ServiceUnavailable(format!("Failed to sync keys to CLIProxyAPI: {err}"))
+                AppError::ServiceUnavailable(format!(
+                    "Failed to sync keys to CLIProxyAPI: {err}"
+                ))
             })?;
 
         if !response.status().is_success() {
             let status = response.status();
             let body = response.text().await.unwrap_or_default();
             tracing::error!(
-                target: "integration.cliproxy",
+                target = "integration.cliproxy",
                 event = "sync_keys_failed",
                 status = status.as_u16(),
                 body = %body
@@ -243,7 +258,7 @@ impl CliProxyClient {
         }
 
         tracing::info!(
-            target: "integration.cliproxy",
+            target = "integration.cliproxy",
             event = "sync_keys_success",
             key_count = keys.len()
         );
@@ -257,11 +272,11 @@ impl CliProxyClient {
             return Ok(());
         }
 
-        let mgmt_key = self.management_key.as_ref().ok_or_else(|| {
-            AppError::BadRequest("Management key is not configured".into())
-        })?;
+        let mgmt_key = self
+            .management_key
+            .as_ref()
+            .ok_or_else(|| AppError::BadRequest("Management key is not configured".into()))?;
 
-        // Use PATCH to add a key - the API expects {"new": "key-value"}
         let url = build_management_url(&self.management_url, "api-keys");
         let payload = serde_json::json!({ "new": key });
         let response = self
@@ -273,18 +288,20 @@ impl CliProxyClient {
             .await
             .map_err(|err| {
                 tracing::error!(
-                    target: "integration.cliproxy",
+                    target = "integration.cliproxy",
                     event = "add_key_failed",
                     error = %err
                 );
-                AppError::ServiceUnavailable(format!("Failed to add key to CLIProxyAPI: {err}"))
+                AppError::ServiceUnavailable(format!(
+                    "Failed to add key to CLIProxyAPI: {err}"
+                ))
             })?;
 
         if !response.status().is_success() {
             let status = response.status();
             let body = response.text().await.unwrap_or_default();
             tracing::error!(
-                target: "integration.cliproxy",
+                target = "integration.cliproxy",
                 event = "add_key_failed",
                 status = status.as_u16(),
                 body = %body
@@ -296,7 +313,7 @@ impl CliProxyClient {
         }
 
         tracing::info!(
-            target: "integration.cliproxy",
+            target = "integration.cliproxy",
             event = "add_key_success",
             key_prefix = &key[..key.len().min(8)]
         );
@@ -310,11 +327,15 @@ impl CliProxyClient {
             return Ok(());
         }
 
-        let mgmt_key = self.management_key.as_ref().ok_or_else(|| {
-            AppError::BadRequest("Management key is not configured".into())
-        })?;
+        let mgmt_key = self
+            .management_key
+            .as_ref()
+            .ok_or_else(|| AppError::BadRequest("Management key is not configured".into()))?;
 
-        let url = build_management_url(&self.management_url, &format!("api-keys?value={}", urlencoding::encode(key)));
+        let url = build_management_url(
+            &self.management_url,
+            &format!("api-keys?value={}", urlencoding::encode(key)),
+        );
         let response = self
             .client
             .delete(url)
@@ -323,18 +344,20 @@ impl CliProxyClient {
             .await
             .map_err(|err| {
                 tracing::error!(
-                    target: "integration.cliproxy",
+                    target = "integration.cliproxy",
                     event = "remove_key_failed",
                     error = %err
                 );
-                AppError::ServiceUnavailable(format!("Failed to remove key from CLIProxyAPI: {err}"))
+                AppError::ServiceUnavailable(format!(
+                    "Failed to remove key from CLIProxyAPI: {err}"
+                ))
             })?;
 
         if !response.status().is_success() {
             let status = response.status();
             let body = response.text().await.unwrap_or_default();
             tracing::error!(
-                target: "integration.cliproxy",
+                target = "integration.cliproxy",
                 event = "remove_key_failed",
                 status = status.as_u16(),
                 body = %body
@@ -346,12 +369,59 @@ impl CliProxyClient {
         }
 
         tracing::info!(
-            target: "integration.cliproxy",
+            target = "integration.cliproxy",
             event = "remove_key_success",
             key_prefix = &key[..key.len().min(8)]
         );
 
         Ok(())
+    }
+
+    /// Forward an arbitrary POST request to the upstream proxy, authenticated with the
+    /// user's token. Returns the status code and parsed JSON body. Does NOT fail on non-2xx
+    /// responses — callers must check the returned status if they care.
+    pub async fn proxy_forward(
+        &self,
+        path: &str,
+        body: Value,
+        token: &str,
+    ) -> Result<(StatusCode, Value), AppError> {
+        let url = format!("{}/{}", self.upstream_url.trim_end_matches('/'), path);
+        let response = self
+            .client
+            .post(&url)
+            .bearer_auth(token)
+            .json(&body)
+            .send()
+            .await
+            .map_err(|err| {
+                tracing::warn!(
+                    target = "integration.cliproxy",
+                    event = "proxy_forward_error",
+                    path,
+                    error = %err
+                );
+                AppError::ServiceUnavailable(format!("Upstream unavailable: {err}"))
+            })?;
+
+        let status = response.status();
+
+        let value = response.json::<Value>().await.map_err(|err| {
+            tracing::warn!(
+                target = "integration.cliproxy",
+                event = "proxy_forward_parse_error",
+                path,
+                error = %err
+            );
+            AppError::BadGateway(format!("Invalid upstream response: {err}"))
+        })?;
+
+        Ok((status, value))
+    }
+
+    /// Returns a reference to the underlying reqwest client for streaming responses.
+    pub fn upstream_client(&self) -> &reqwest::Client {
+        &self.client
     }
 }
 
@@ -396,8 +466,12 @@ async fn map_management_response(response: reqwest::Response) -> Result<Value, A
         StatusCode::UNAUTHORIZED | StatusCode::FORBIDDEN => {
             Err(AppError::Unauthorized("Management API authorization failed".into()))
         }
-        StatusCode::NOT_FOUND => Err(AppError::NotFound("Management API endpoint not found".into())),
-        StatusCode::BAD_REQUEST => Err(AppError::BadRequest("Management API rejected the request".into())),
+        StatusCode::NOT_FOUND => Err(AppError::NotFound(
+            "Management API endpoint not found".into(),
+        )),
+        StatusCode::BAD_REQUEST => {
+            Err(AppError::BadRequest("Management API rejected the request".into()))
+        }
         _ => Err(AppError::ServiceUnavailable(format!(
             "Management API request failed with status {}",
             status.as_u16()

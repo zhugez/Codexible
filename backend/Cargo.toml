@@ -49,6 +49,11 @@ anyhow = "1"
 # URL encoding
 urlencoding = "2"
 
+# Async utilities
+bytes = "1"
+tokio-util = { version = "0.7", features = ["io"] }
+futures-util = "0.3"
+
 [dev-dependencies]
 tokio = { version = "1", features = ["full", "test-util"] }
 

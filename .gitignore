@@ -54,3 +54,4 @@ codexsecret/
 cli-proxy-api/auths/*.json
 cli-proxy-api/logs/
 cli-proxy-api/*.bak
+.ant-colony/

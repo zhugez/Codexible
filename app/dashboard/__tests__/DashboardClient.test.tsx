@@ -2,7 +2,11 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/app/lib/api", () => ({
-  getDashboardOverview: vi.fn(),
+  getUsageHistory: vi.fn(),
+  getUsageStats: vi.fn(),
+  getUsageDetailed: vi.fn(),
+  getModelBreakdown: vi.fn(),
+  getHourlyDistribution: vi.fn(),
 }));
 
 vi.mock("../components/SubscriptionInfo", () => ({
@@ -27,13 +31,23 @@ vi.mock("../components/DateRangePicker", () => ({
   DateRangePicker: () => <div>range</div>,
 }));
 
-import { getDashboardOverview } from "@/app/lib/api";
+import {
+  getUsageHistory,
+  getUsageStats,
+  getUsageDetailed,
+  getModelBreakdown,
+  getHourlyDistribution,
+} from "@/app/lib/api";
 import { DashboardClient } from "../DashboardClient";
 
-const mockGetDashboardOverview = vi.mocked(getDashboardOverview);
+const mockGetUsageHistory = vi.mocked(getUsageHistory);
+const mockGetUsageStats = vi.mocked(getUsageStats);
+const mockGetUsageDetailed = vi.mocked(getUsageDetailed);
+const mockGetModelBreakdown = vi.mocked(getModelBreakdown);
+const mockGetHourlyDistribution = vi.mocked(getHourlyDistribution);
 
-const baseData = {
-  owner: "fallback@codexible.me",
+const baseAccountData = {
+  owner: "user@codexible.me",
   plan: "Pro",
   status: "active",
   dailyLimit: 250,
@@ -44,10 +58,21 @@ const baseData = {
   sessionSource: "local",
 };
 
-describe("DashboardClient fallback behavior", () => {
+describe("DashboardClient", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.clear();
+    const store: Record<string, string> = {};
+    Object.defineProperty(window, "localStorage", {
+      value: {
+        getItem: (key: string) => store[key] ?? null,
+        setItem: (key: string, value: string) => { store[key] = value; },
+        removeItem: (key: string) => { delete store[key]; },
+        clear: () => { Object.keys(store).forEach((k) => delete store[k]); },
+        get length() { return Object.keys(store).length; },
+        key: (_i: number) => Object.keys(store)[_i] ?? null,
+      },
+      writable: true,
+    });
     Object.defineProperty(window, "matchMedia", {
       writable: true,
       value: vi.fn().mockImplementation((query: string) => ({
@@ -61,214 +86,139 @@ describe("DashboardClient fallback behavior", () => {
         dispatchEvent: vi.fn(),
       })),
     });
-  });
 
-  it("renders API mode without degraded banner", () => {
-    render(
-      <DashboardClient
-        initialData={baseData}
-        token="codexible_demo_pro_2026"
-        initialSourceMode="api"
-        fallbackReason={null}
-        fallbackActivatedAt={null}
-        fallbackExpiresAt={null}
-        fallbackRetryMs={5000}
-        initialLoadDurationMs={20}
-      />,
-    );
-
-    expect(screen.queryByText(/degraded fallback mode/i)).not.toBeInTheDocument();
-  });
-
-  it("shows expiration message when fallback has already expired", async () => {
-    render(
-      <DashboardClient
-        initialData={baseData}
-        token="codexible_demo_pro_2026"
-        initialSourceMode="fallback"
-        fallbackReason="backend down"
-        fallbackActivatedAt={1000}
-        fallbackExpiresAt={1000}
-        fallbackRetryMs={5000}
-        initialLoadDurationMs={20}
-      />,
-    );
-
-    expect(await screen.findByText(/Fallback window expired/i)).toBeInTheDocument();
-  });
-
-  it("recovers from fallback when API becomes available", async () => {
-    mockGetDashboardOverview.mockResolvedValue({
-      user: {
-        email: "api@codexible.me",
-        name: "API User",
-        plan: "Pro",
-        status: "active",
-      },
-      usage: {
-        credits_used: 12,
-        daily_limit: 250,
-        request_count: 11,
-        date: "2026-03-01",
-      },
-      key: {
-        id: "k1",
-        prefix: "codexible_demo",
-        label: "Demo",
-        status: "active",
-        created_at: "2026-03-01T00:00:00Z",
-        last_used_at: null,
-      },
-      role: "user",
-      session_source: "local",
+    mockGetUsageHistory.mockResolvedValue([
+      { date: "2026-03-20", cost: 1.5 },
+      { date: "2026-03-21", cost: 2.3 },
+    ]);
+    mockGetUsageStats.mockResolvedValue({
+      totalRequests: 100,
+      totalCost: 12.5,
+      promptTokens: 0,
+      completionTokens: 0,
     });
-
-    render(
-      <DashboardClient
-        initialData={baseData}
-        token="codexible_demo_pro_2026"
-        initialSourceMode="fallback"
-        fallbackReason="backend down"
-        fallbackActivatedAt={Date.now()}
-        fallbackExpiresAt={Date.now() + 60_000}
-        fallbackRetryMs={5000}
-        initialLoadDurationMs={20}
-      />,
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText(/Welcome, api@codexible.me/)).toBeInTheDocument();
-    });
-    expect(screen.queryByText(/degraded fallback mode/i)).not.toBeInTheDocument();
+    mockGetUsageDetailed.mockResolvedValue([
+      {
+        id: "req-1",
+        model: "gpt-5.3-codex",
+        promptTokens: 500,
+        completionTokens: 200,
+        costUSD: 0.035,
+        createdAt: "2026-03-21T10:00:00Z",
+        date: "2026-03-21",
+      },
+    ]);
+    mockGetModelBreakdown.mockResolvedValue([
+      { model: "gpt-5.3-codex", totalCost: 8.5, requests: 45, promptTokens: 0, completionTokens: 0 },
+    ]);
+    mockGetHourlyDistribution.mockResolvedValue([
+      { hour: 10, requests: 5 },
+      { hour: 14, requests: 10 },
+    ]);
   });
 
-  it("retries recovery while fallback window is active", async () => {
+  it("renders the dashboard header with owner name", async () => {
     vi.useFakeTimers();
-    vi.setSystemTime(new Date("2026-03-01T00:00:00Z"));
-    mockGetDashboardOverview.mockRejectedValue(new Error("still down"));
-
-    render(
-      <DashboardClient
-        initialData={baseData}
-        token="codexible_demo_pro_2026"
-        initialSourceMode="fallback"
-        fallbackReason="backend down"
-        fallbackActivatedAt={Date.now()}
-        fallbackExpiresAt={Date.now() + 10_000}
-        fallbackRetryMs={1000}
-        initialLoadDurationMs={20}
-      />,
-    );
-
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(3200);
+      render(<DashboardClient accountData={baseAccountData} token="token123" />);
+      await vi.runAllTimersAsync();
     });
-
-    expect(mockGetDashboardOverview.mock.calls.length).toBeGreaterThanOrEqual(3);
-    expect(screen.getByText(/degraded fallback mode/i)).toBeInTheDocument();
     vi.useRealTimers();
+    expect(screen.getByText(/Welcome, user@codexible\.me/)).toBeInTheDocument();
   });
 
-  it("renders language, theme, and logout controls in the header action cluster", () => {
-    render(
-      <DashboardClient
-        initialData={baseData}
-        token="codexible_demo_pro_2026"
-        initialSourceMode="api"
-        fallbackReason={null}
-        fallbackActivatedAt={null}
-        fallbackExpiresAt={null}
-        fallbackRetryMs={5000}
-        initialLoadDurationMs={20}
-      />,
-    );
-
+  it("renders language, theme, and logout controls in the header action cluster", async () => {
+    vi.useFakeTimers();
+    await act(async () => {
+      render(<DashboardClient accountData={baseAccountData} token="token123" />);
+      await vi.runAllTimersAsync();
+    });
+    vi.useRealTimers();
     expect(screen.getByRole("group", { name: /select language/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /switch to dark mode/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /log out/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /settings/i })).toBeInTheDocument();
   });
 
-  it("renders admin entrypoint when session role is admin", () => {
-    render(
-      <DashboardClient
-        initialData={{ ...baseData, role: "admin" }}
-        token="codexible_demo_pro_2026"
-        initialSourceMode="api"
-        fallbackReason={null}
-        fallbackActivatedAt={null}
-        fallbackExpiresAt={null}
-        fallbackRetryMs={5000}
-        initialLoadDurationMs={20}
-      />,
-    );
-
+  it("renders admin entrypoint when session role is admin", async () => {
+    vi.useFakeTimers();
+    await act(async () => {
+      render(<DashboardClient accountData={{ ...baseAccountData, role: "admin" }} token="token123" />);
+      await vi.runAllTimersAsync();
+    });
+    vi.useRealTimers();
     expect(screen.getByRole("link", { name: /admin center/i })).toBeInTheDocument();
   });
 
-  it("keeps the header action cluster configured for responsive visibility", () => {
-    render(
-      <DashboardClient
-        initialData={baseData}
-        token="codexible_demo_pro_2026"
-        initialSourceMode="api"
-        fallbackReason={null}
-        fallbackActivatedAt={null}
-        fallbackExpiresAt={null}
-        fallbackRetryMs={5000}
-        initialLoadDurationMs={20}
-      />,
-    );
-
+  it("keeps the header action cluster configured for responsive visibility", async () => {
+    vi.useFakeTimers();
+    await act(async () => {
+      render(<DashboardClient accountData={baseAccountData} token="token123" />);
+      await vi.runAllTimersAsync();
+    });
+    vi.useRealTimers();
     const actions = screen.getByTestId("dashboard-header-actions");
     expect(actions).toHaveClass("flex-wrap");
     expect(actions.className).toContain("sm:flex-nowrap");
     expect(screen.getByRole("group", { name: /select language/i })).toBeVisible();
   });
 
-  it("switches dashboard copy when changing language from the header", () => {
-    render(
-      <DashboardClient
-        initialData={baseData}
-        token="codexible_demo_pro_2026"
-        initialSourceMode="api"
-        fallbackReason={null}
-        fallbackActivatedAt={null}
-        fallbackExpiresAt={null}
-        fallbackRetryMs={5000}
-        initialLoadDurationMs={20}
-      />,
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: /chuyển sang tiếng việt/i }));
-
-    expect(screen.getByText(/chào mừng, fallback@codexible\.me/i)).toBeInTheDocument();
+  it("switches dashboard copy when changing language from the header", async () => {
+    vi.useFakeTimers();
+    await act(async () => {
+      render(<DashboardClient accountData={baseAccountData} token="token123" />);
+      await vi.runAllTimersAsync();
+    });
+    vi.useRealTimers();
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /chuyển sang tiếng việt/i }));
+    });
+    expect(screen.getByText(/Chao muon, user@codexible\.me/i)).toBeInTheDocument();
     expect(localStorage.getItem("codexible_lang")).toBe("vi");
   });
 
-  it("applies theme changes immediately from the dashboard header toggle", () => {
+  it("applies theme changes immediately from the dashboard header toggle", async () => {
     localStorage.setItem("theme", "light");
-
-    render(
-      <DashboardClient
-        initialData={baseData}
-        token="codexible_demo_pro_2026"
-        initialSourceMode="api"
-        fallbackReason={null}
-        fallbackActivatedAt={null}
-        fallbackExpiresAt={null}
-        fallbackRetryMs={5000}
-        initialLoadDurationMs={20}
-      />,
-    );
-
+    vi.useFakeTimers();
+    await act(async () => {
+      render(<DashboardClient accountData={baseAccountData} token="token123" />);
+      await vi.runAllTimersAsync();
+    });
+    vi.useRealTimers();
     const toggle = screen.getByRole("button", { name: /switch to dark mode/i });
     expect(toggle).toHaveAttribute("aria-pressed", "false");
-
-    fireEvent.click(toggle);
-
+    await act(async () => {
+      fireEvent.click(toggle);
+    });
     expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
     expect(localStorage.getItem("theme")).toBe("dark");
     expect(toggle).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("shows error banner when API calls fail", async () => {
+    mockGetUsageHistory.mockRejectedValue(new Error("backend unavailable"));
+
+    vi.useFakeTimers();
+    await act(async () => {
+      render(<DashboardClient accountData={baseAccountData} token="token123" />);
+      await vi.runAllTimersAsync();
+    });
+    vi.useRealTimers();
+    await waitFor(() => {
+      expect(screen.getByText(/Failed to load usage data/)).toBeInTheDocument();
+    });
+    expect(screen.getByText(/backend unavailable/)).toBeInTheDocument();
+  });
+
+  it("renders balance, runway, and status cards with account data", async () => {
+    vi.useFakeTimers();
+    await act(async () => {
+      render(<DashboardClient accountData={baseAccountData} token="token123" />);
+      await vi.runAllTimersAsync();
+    });
+    vi.useRealTimers();
+    expect(screen.getByText(/200/)).toBeInTheDocument();
+    expect(screen.getByText(/credits/)).toBeInTheDocument();
+    expect(screen.getByText(/active/)).toBeInTheDocument();
   });
 });

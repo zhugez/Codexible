@@ -22,6 +22,9 @@ pub enum AppError {
     #[error("Bad request: {0}")]
     BadRequest(String),
 
+    #[error("Bad gateway: {0}")]
+    BadGateway(String),
+
     #[error("Service unavailable: {0}")]
     ServiceUnavailable(String),
 
@@ -50,6 +53,7 @@ impl AppError {
             Self::QuotaExceeded(_) => StatusCode::TOO_MANY_REQUESTS,
             Self::RateLimited(_) => StatusCode::TOO_MANY_REQUESTS,
             Self::BadRequest(_) => StatusCode::BAD_REQUEST,
+            Self::BadGateway(_) => StatusCode::BAD_GATEWAY,
             Self::ServiceUnavailable(_) => StatusCode::SERVICE_UNAVAILABLE,
             Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
@@ -63,6 +67,7 @@ impl AppError {
             Self::QuotaExceeded(_) => "quota_exceeded",
             Self::RateLimited(_) => "rate_limited",
             Self::BadRequest(_) => "bad_request",
+            Self::BadGateway(_) => "bad_gateway",
             Self::ServiceUnavailable(_) => "service_unavailable",
             Self::Internal(_) => "internal_error",
         }
@@ -95,5 +100,12 @@ impl From<fred::error::Error> for AppError {
     fn from(err: fred::error::Error) -> Self {
         tracing::error!("Redis error: {:?}", err);
         Self::Internal("Cache error".into())
+    }
+}
+
+impl From<axum::http::Error> for AppError {
+    fn from(err: axum::http::Error) -> Self {
+        tracing::error!("HTTP body error: {:?}", err);
+        Self::Internal("HTTP body error".into())
     }
 }

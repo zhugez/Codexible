@@ -9,9 +9,6 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-vi.mock("@/app/lib", () => ({
-  findToken: vi.fn(),
-}));
 
 vi.mock("@/app/lib/api", () => ({
   validateToken: vi.fn(),
