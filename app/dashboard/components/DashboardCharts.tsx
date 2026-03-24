@@ -14,7 +14,7 @@ import {
   Tooltip,
   Filler,
 } from "chart.js";
-import type { DailyUsage, ModelBreakdown } from "@/app/lib/mockDashboardData";
+import type { DailyUsage, ModelBreakdown } from "@/app/lib/api";
 
 Chart.register(
   LineController,

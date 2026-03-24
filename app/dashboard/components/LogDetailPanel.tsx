@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import type { RecentActivity } from "@/app/lib/mockDashboardData";
+import type { RecentActivity } from "@/app/lib/api";
 
 interface LogDetailPanelProps {
     log: RecentActivity | null;
@@ -9,32 +9,32 @@ interface LogDetailPanelProps {
 export function LogDetailPanel({ log, onClose }: LogDetailPanelProps) {
     if (!log) return null;
 
-    // Mock Request/Response payloads based on the log
-    const mockRequest = {
+    // Request/Response data from the log entry
+    const requestData = {
         method: "POST",
         url: "https://api.codexible.com/v1/chat/completions",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer sk-mock-***"
+            "Authorization": "Bearer [token]"
         },
         body: {
             model: log.model,
-            messages: [{ role: "user", content: "Tell me a joke about programming." }],
+            messages: "[request body not stored]",
             temperature: 0.7
         }
     };
 
-    const mockResponse = {
-        id: `chatcmpl-${log.id}`,
+    const responseData = {
+        id: `req-${log.id}`,
         object: "chat.completion",
-        created: new Date(log.createdAt).getTime() / 1000,
+        created: Math.floor(new Date(log.createdAt).getTime() / 1000),
         model: log.model,
         choices: [
             {
                 index: 0,
                 message: {
                     role: "assistant",
-                    content: "Why do programmers prefer dark mode? Because light attracts bugs!"
+                    content: "[response content not stored]"
                 },
                 finish_reason: "stop"
             }
@@ -90,7 +90,7 @@ export function LogDetailPanel({ log, onClose }: LogDetailPanelProps) {
                         <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-2">Request</h3>
                         <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-code)] p-0 overflow-hidden">
                             <pre className="p-4 font-mono text-xs text-[#e5e7eb] overflow-x-auto">
-                                <code dangerouslySetInnerHTML={{ __html: syntaxHighlight(JSON.stringify(mockRequest, null, 2)) }} />
+                                {JSON.stringify(requestData, null, 2)}
                             </pre>
                         </div>
                     </div>
@@ -99,7 +99,7 @@ export function LogDetailPanel({ log, onClose }: LogDetailPanelProps) {
                         <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-2">Response</h3>
                         <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-code)] p-0 overflow-hidden">
                             <pre className="p-4 font-mono text-xs text-[#e5e7eb] overflow-x-auto">
-                                <code dangerouslySetInnerHTML={{ __html: syntaxHighlight(JSON.stringify(mockResponse, null, 2)) }} />
+                                {JSON.stringify(responseData, null, 2)}
                             </pre>
                         </div>
                     </div>
@@ -109,21 +109,3 @@ export function LogDetailPanel({ log, onClose }: LogDetailPanelProps) {
     );
 }
 
-function syntaxHighlight(json: string) {
-    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
-        let cls = 'text-[#3b82f6]'; // string
-        if (/^"/.test(match)) {
-            if (/:$/.test(match)) {
-                cls = 'text-[#f472b6]'; // key
-            }
-        } else if (/true|false/.test(match)) {
-            cls = 'text-[#10b981]'; // boolean
-        } else if (/null/.test(match)) {
-            cls = 'text-[#ef4444]'; // null
-        } else {
-            cls = 'text-[#f59e0b]'; // number
-        }
-        return '<span class="' + cls + '">' + match + '</span>';
-    });
-}

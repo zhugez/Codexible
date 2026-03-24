@@ -11,7 +11,7 @@ interface SettingsClientProps {
 }
 
 export function SettingsClient({ token }: SettingsClientProps) {
-    const [activeTab, setActiveTab] = useState<Tab>("keys");
+    const [activeTab, setActiveTab] = useState<Tab>("profile");
 
     return (
         <div className="flex flex-col gap-8 md:flex-row md:items-start">

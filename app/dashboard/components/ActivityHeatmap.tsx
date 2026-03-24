@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { HourlyDistribution } from "@/app/lib/mockDashboardData";
+import type { HourlyDistribution } from "@/app/lib/api";
 
 interface ActivityHeatmapProps {
   data: HourlyDistribution[];

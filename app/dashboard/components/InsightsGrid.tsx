@@ -1,7 +1,7 @@
 "use client";
 
-import { Activity, DollarSign, TrendingUp, FileText, FileOutput, Clock } from "lucide-react";
-import type { DashboardStats, HourlyDistribution } from "@/app/lib/mockDashboardData";
+import { Activity, DollarSign, TrendingUp, Clock } from "lucide-react";
+import type { DashboardStats, HourlyDistribution } from "@/app/lib/api";
 
 interface InsightsGridProps {
   stats: DashboardStats;
@@ -20,13 +20,11 @@ export function InsightsGrid({ stats, hourlyData }: InsightsGridProps) {
     { icon: Activity, label: "Total Requests", value: stats.totalRequests.toLocaleString() },
     { icon: DollarSign, label: "Total Spent", value: `$${stats.totalCost.toFixed(2)}` },
     { icon: TrendingUp, label: "Avg Daily Cost", value: `$${avgDailyCost.toFixed(2)}` },
-    { icon: FileText, label: "Input Tokens", value: `${(stats.promptTokens / 1000).toFixed(0)}K` },
-    { icon: FileOutput, label: "Output Tokens", value: `${(stats.completionTokens / 1000).toFixed(0)}K` },
     { icon: Clock, label: "Peak Hour", value: peakHourValue },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
       {metrics.map(({ icon: Icon, label, value }) => (
         <div
           key={label}

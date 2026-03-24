@@ -76,9 +76,10 @@ export function AdminClient({ token }: AdminClientProps) {
       setTokens(tokenItems);
       setLogs(logItems);
 
+      // Set initial user selection after data loads — avoids stale closure
       const firstUser = userItems[0];
-      if (!selectedUserId && firstUser) {
-        setSelectedUserId(firstUser.id);
+      if (firstUser) {
+        setSelectedUserId((prev) => prev || firstUser.id);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load admin data");

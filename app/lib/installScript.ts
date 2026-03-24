@@ -34,10 +34,14 @@ function validateApiKey(key: string): void {
  * Escapes special shell characters in a string
  */
 function escapeForShell(input: string): string {
-  // Remove null bytes and control characters
   const sanitized = input.replace(/[\x00-\x1F\x7F]/g, "");
-  // Escape single quotes by ending the quoted string, adding an escaped quote, and starting a new quoted string
-  return sanitized.replace(/'/g, "'\\''");
+  // Escape ALL shell metacharacters — single-quote escaping alone is insufficient
+  // because $, `, \ are still interpreted inside single-quoted strings in POSIX sh
+  return sanitized
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "'\\''")
+    .replace(/\$/g, "\\$")
+    .replace(/`/g, "\\`");
 }
 
 /**

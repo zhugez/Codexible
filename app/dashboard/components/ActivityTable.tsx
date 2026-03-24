@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { RecentActivity } from "@/app/lib/mockDashboardData";
+import type { RecentActivity } from "@/app/lib/api";
 import { LogDetailPanel } from "./LogDetailPanel";
 
 interface ActivityTableProps {
@@ -27,10 +27,7 @@ export function ActivityTable({ data }: ActivityTableProps) {
       <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-primary)]">
         <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
           <h3 className="text-sm font-semibold text-[var(--text-primary)]">Recent Activity</h3>
-          <span className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)]">
-            <span className="h-2 w-2 rounded-full bg-[var(--text-muted)]" />
-            offline
-          </span>
+          <span className="text-xs text-[var(--text-muted)]">Recent Activity</span>
         </div>
 
         <div className="max-h-[260px] overflow-auto">
@@ -46,7 +43,7 @@ export function ActivityTable({ data }: ActivityTableProps) {
             <tbody>
               {data.map((item, i) => (
                 <tr
-                  key={item.id || i}
+                  key={item.id ?? `fallback-${i}`}
                   onClick={() => setSelectedLog(item)}
                   className="cursor-pointer border-t border-[var(--border)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-secondary)]"
                 >

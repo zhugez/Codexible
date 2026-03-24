@@ -2,16 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { findToken } from "@/app/lib";
-import { validateToken } from "@/app/lib/api";
-
-const ENABLE_MOCK_FALLBACK = process.env.NEXT_PUBLIC_ENABLE_MOCK_TOKEN_FALLBACK === "true";
-const BACKEND_CONNECTIVITY_PATTERN =
-  /cannot reach backend api|content security policy|connect-src|failed to fetch|network error/i;
-
-function isConnectivityError(error: unknown): boolean {
-  return error instanceof Error && BACKEND_CONNECTIVITY_PATTERN.test(error.message);
-}
+import { validateToken, isBackendConnectivityError } from "@/app/lib/api";
 
 export default function DashboardLoginClient() {
   const [token, setToken] = useState("");
@@ -24,7 +15,7 @@ export default function DashboardLoginClient() {
     setError(null);
     setLoading(true);
 
-    const normalizedToken = token.trim().replace(/^["'`]+|["'`]+$/g, "");
+    const normalizedToken = token.trim().replace(/^["'`]+|["'`]+$/g, "").replace(/[\s\u200B-\u200D\uFEFF]/g, "");
     if (!normalizedToken) {
       setError("Token is required.");
       setLoading(false);
@@ -34,44 +25,31 @@ export default function DashboardLoginClient() {
     try {
       const result = await validateToken(normalizedToken);
       if (result.valid && result.role === "admin") {
-        router.push(`/dashboard/admin?token=${encodeURIComponent(normalizedToken)}`);
+        localStorage.setItem("codexible_token", normalizedToken);
+        window.history.replaceState(null, "", window.location.pathname);
+        router.push("/dashboard/admin");
         return;
       }
 
       if (result.valid) {
-        router.push(`/dashboard?token=${encodeURIComponent(normalizedToken)}`);
+        localStorage.setItem("codexible_token", normalizedToken);
+        window.history.replaceState(null, "", window.location.pathname);
+        router.push("/dashboard");
         return;
       }
     } catch (error) {
-      if (isConnectivityError(error)) {
+      if (isBackendConnectivityError(error)) {
         const message =
           error instanceof Error ? error.message : "Cannot reach backend API.";
         setError(message);
         setLoading(false);
         return;
       }
-
-      if (!ENABLE_MOCK_FALLBACK) {
-        const message = error instanceof Error ? error.message : "Token validation failed";
-        setError(message);
-        setLoading(false);
-        return;
-      }
-
-      const match = findToken(normalizedToken);
-      if (match) {
-        router.push(`/dashboard?token=${encodeURIComponent(match.token)}`);
-        return;
-      }
+      const message = error instanceof Error ? error.message : "Token validation failed";
+      setError(message);
     } finally {
       setLoading(false);
     }
-
-    setError(
-      ENABLE_MOCK_FALLBACK
-        ? "Invalid token. Try one from the demo docs."
-        : "Invalid token. Please check your CLIProxyAPI token and try again.",
-    );
   };
 
   return (
@@ -115,16 +93,6 @@ export default function DashboardLoginClient() {
             {loading ? "Verifying..." : "Enter Dashboard"}
           </button>
         </form>
-
-        {ENABLE_MOCK_FALLBACK && (
-          <p className="mt-4 text-xs text-[var(--text-muted)]">
-            Demo tokens are listed on the{" "}
-            <a href="/docs" className="underline underline-offset-2 hover:text-[var(--accent)]">
-              docs page
-            </a>
-            .
-          </p>
-        )}
       </div>
     </main>
   );

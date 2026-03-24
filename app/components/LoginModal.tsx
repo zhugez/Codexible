@@ -3,8 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { findToken } from "@/app/lib";
-import { validateToken } from "@/app/lib/api";
+import { validateToken, isBackendConnectivityError } from "@/app/lib/api";
 import type { Translation } from "@/app/types";
 
 interface LoginModalProps {
@@ -18,9 +17,7 @@ export function LoginModal({ open, onClose, t }: LoginModalProps) {
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const allowMockFallback = process.env.NEXT_PUBLIC_ENABLE_MOCK_TOKEN_FALLBACK === "true";
-  const connectivityErrorPattern =
-    /cannot reach backend api|content security policy|connect-src|failed to fetch|network error/i;
+  // connectivity check delegated to isBackendConnectivityError
 
   useEffect(() => {
     if (open) {
@@ -49,40 +46,27 @@ export function LoginModal({ open, onClose, t }: LoginModalProps) {
       const result = await validateToken(apiKey);
       if (result.valid && result.role === "admin") {
         localStorage.setItem("codexible_token", apiKey);
+        // Strip token from URL before navigating — prevents browser history / server-log exposure
+        window.history.replaceState(null, "", window.location.pathname);
         onClose();
-        router.push(`/dashboard/admin?token=${encodeURIComponent(apiKey)}`);
+        router.push("/dashboard/admin");
         return;
       }
 
       if (result.valid) {
         localStorage.setItem("codexible_token", apiKey);
+        window.history.replaceState(null, "", window.location.pathname);
         onClose();
-        router.push(`/dashboard?token=${encodeURIComponent(apiKey)}`);
+        router.push("/dashboard");
         return;
       }
     } catch (error) {
-      if (error instanceof Error && connectivityErrorPattern.test(error.message)) {
+      if (isBackendConnectivityError(error)) {
         setError(error.message);
         return;
       }
-
-      if (!allowMockFallback) {
-        setError(error instanceof Error ? error.message : t.loginModal.error);
-        return;
-      }
+      setError(error instanceof Error ? error.message : t.loginModal.error);
     }
-
-    if (allowMockFallback) {
-      const record = findToken(apiKey);
-      if (record) {
-        localStorage.setItem("codexible_token", apiKey);
-        onClose();
-        router.push(`/dashboard?token=${encodeURIComponent(apiKey)}`);
-        return;
-      }
-    }
-
-    setError(t.loginModal.error);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

@@ -1,6 +1,16 @@
 const DEV_DEFAULT_API_BASE = "http://localhost:3001";
-const CONNECTIVITY_ERROR_MESSAGE =
+
+export const BACKEND_CONNECTIVITY_ERROR_MESSAGE =
   "Cannot reach backend API. Check NEXT_PUBLIC_API_URL, CSP connect-src policy, and backend health.";
+
+export function isBackendConnectivityError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  return /cannot reach backend api|content security policy|connect-src|failed to fetch|network error/i.test(
+    error.message,
+  );
+}
+// Reuse the exported constant to avoid duplication
+const CONNECTIVITY_ERROR_MESSAGE = BACKEND_CONNECTIVITY_ERROR_MESSAGE;
 
 function normalizeApiBaseUrl(input: string, sourceName: string = "NEXT_PUBLIC_API_URL"): string {
   const trimmed = input.trim();
@@ -169,7 +179,7 @@ export interface UserResponse {
 export interface ValidateResponse {
   valid: boolean;
   user: UserResponse | null;
-  role?: "user" | "admin" | string | null;
+  role?: "user" | "admin" | null;
   session_source?: "local" | "cliproxy" | string | null;
   degraded?: boolean;
   message?: string | null;
@@ -195,8 +205,8 @@ export interface DashboardOverview {
   user: UserResponse;
   usage: UsageSummary;
   key: KeyInfo;
-  role?: "user" | "admin" | string;
-  session_source?: "local" | "cliproxy" | string;
+  role?: "user" | "admin" | null;
+  session_source?: "local" | "cliproxy" | null;
   degraded?: boolean;
 }
 
@@ -444,4 +454,144 @@ export async function getAdminLogs(
   await expectOk(res, "Admin logs");
   const json = await res.json();
   return json.logs ?? [];
+}
+
+// --- Usage API types and functions ---
+
+export interface DailyUsage {
+  date: string;
+  cost: number;
+}
+
+export interface ModelBreakdown {
+  model: string;
+  totalCost: number;
+  requests: number;
+  promptTokens: number;
+  completionTokens: number;
+}
+
+export interface RecentActivity {
+  id: string;
+  model: string;
+  promptTokens: number;
+  completionTokens: number;
+  costUSD: number;
+  createdAt: string;
+  date: string;
+}
+
+export interface HourlyDistribution {
+  hour: number;
+  requests: number;
+}
+
+export interface DashboardStats {
+  totalRequests: number;
+  totalCost: number;
+  promptTokens: number;
+  completionTokens: number;
+}
+
+export interface UsageHistoryEntry {
+  date: string;
+  credits_used: number;
+  request_count: number;
+  cost_usd: number | null;
+}
+
+function toDailyUsage(history: UsageHistoryEntry[]): DailyUsage[] {
+  return history.map((h) => ({
+    date: h.date,
+    cost: h.cost_usd ?? 0,
+  }));
+}
+
+function toStats(history: UsageHistoryEntry[]): DashboardStats {
+  const totalRequests = history.reduce((sum, h) => sum + h.request_count, 0);
+  const totalCost = history.reduce((sum, h) => sum + (h.cost_usd ?? 0), 0);
+  return {
+    totalRequests,
+    totalCost: Number(totalCost.toFixed(2)),
+    promptTokens: 0,
+    completionTokens: 0,
+  };
+}
+
+export async function getUsageHistory(token: string, days: number): Promise<DailyUsage[]> {
+  const res = await request(`/api/usage/history?days=${days}`, {
+    cache: "no-store",
+    headers: authHeaders(token),
+  });
+  await expectOk(res, "Usage history");
+  const json: UsageHistoryEntry[] = await res.json();
+  return toDailyUsage(json);
+}
+
+export async function getUsageStats(token: string, days: number): Promise<DashboardStats> {
+  const res = await request(`/api/usage/history?days=${days}`, {
+    cache: "no-store",
+    headers: authHeaders(token),
+  });
+  await expectOk(res, "Usage stats");
+  const json: UsageHistoryEntry[] = await res.json();
+  return toStats(json);
+}
+
+export async function getUsageDetailed(token: string, days: number, limit = 100): Promise<RecentActivity[]> {
+  const res = await request(`/api/usage/detailed?days=${days}&limit=${limit}`, {
+    cache: "no-store",
+    headers: authHeaders(token),
+  });
+  await expectOk(res, "Usage detailed");
+  const json: Array<{
+    id: string;
+    model: string;
+    prompt_tokens: number;
+    completion_tokens: number;
+    cost_usd: number;
+    created_at: string;
+    date: string;
+  }> = await res.json();
+  return json.map((e) => ({
+    id: e.id,
+    model: e.model,
+    promptTokens: e.prompt_tokens,
+    completionTokens: e.completion_tokens,
+    costUSD: e.cost_usd,
+    createdAt: e.created_at,
+    date: e.date,
+  }));
+}
+
+export async function getModelBreakdown(token: string, days: number): Promise<ModelBreakdown[]> {
+  const res = await request(`/api/usage/models?days=${days}`, {
+    cache: "no-store",
+    headers: authHeaders(token),
+  });
+  await expectOk(res, "Model breakdown");
+  const json: Array<{
+    model: string;
+    total_cost: number;
+    requests: number;
+    prompt_tokens: number;
+    completion_tokens: number;
+  }> = await res.json();
+  return json.map((e) => ({
+    model: e.model,
+    totalCost: e.total_cost,
+    requests: e.requests,
+    promptTokens: e.prompt_tokens,
+    completionTokens: e.completion_tokens,
+  }));
+}
+
+export async function getHourlyDistribution(token: string, date: string): Promise<HourlyDistribution[]> {
+  const res = await request(`/api/usage/hourly?date=${date}`, {
+    cache: "no-store",
+    headers: authHeaders(token),
+  });
+  await expectOk(res, "Hourly distribution");
+  const json: Array<{ hour: number; requests: number }> = await res.json();
+  return json.map((e) => ({ hour: e.hour, requests: e.requests }));
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Clipboard, Settings, FileText, MessageCircle } from "lucide-react";
 import { useCopyToClipboard } from "@/app/hooks";
 
@@ -8,10 +9,15 @@ interface QuickActionsProps {
 }
 
 export function QuickActions({ token }: QuickActionsProps) {
+  // Fall back to localStorage now that tokens are stripped from URLs
+  const [storedToken] = useState(
+    () => token || (typeof window !== "undefined" ? localStorage.getItem("codexible_token") ?? "" : ""),
+  );
+  const activeToken = token || storedToken;
   const { copy } = useCopyToClipboard();
 
-  const envConfig = `export ANTHROPIC_BASE_URL="https://codexible.me/v1"\nexport ANTHROPIC_AUTH_TOKEN="${token}"`;
-  const settingsConfig = `{\n  "apiBaseUrl": "https://codexible.me/v1",\n  "apiKey": "${token}"\n}`;
+  const envConfig = `export ANTHROPIC_BASE_URL="https://codexible.me/v1"\nexport ANTHROPIC_AUTH_TOKEN="${activeToken}"`;
+  const settingsConfig = `{\n  "apiBaseUrl": "https://codexible.me/v1",\n  "apiKey": "${activeToken}"\n}`;
 
   const actions = [
     { icon: Clipboard, label: "Copy ENV Config", onClick: () => copy(envConfig) },

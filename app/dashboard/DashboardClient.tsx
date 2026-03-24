@@ -1,13 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut, Settings, Shield } from "lucide-react";
-import { getDashboardOverview } from "@/app/lib/api";
+import {
+  getUsageHistory,
+  getUsageStats,
+  getUsageDetailed,
+  getModelBreakdown,
+  getHourlyDistribution,
+  type DailyUsage,
+  type ModelBreakdown,
+  type RecentActivity,
+  type HourlyDistribution,
+  type DashboardStats,
+} from "@/app/lib/api";
 import { LanguageToggle } from "@/app/components/LanguageToggle";
 import { ThemeToggle } from "@/app/components/ThemeToggle";
 import type { Lang } from "@/app/types";
-import { MockDataService } from "@/app/lib/mockDashboardData";
 import { SubscriptionInfo } from "./components/SubscriptionInfo";
 import { DashboardCharts } from "./components/DashboardCharts";
 import { InsightsGrid } from "./components/InsightsGrid";
@@ -15,35 +25,23 @@ import { ActivityHeatmap } from "./components/ActivityHeatmap";
 import { ActivityTable } from "./components/ActivityTable";
 import { QuickActions } from "./components/QuickActions";
 import { DateRangePicker, type DateRangeOption } from "./components/DateRangePicker";
-import {
-  mapOverviewToDashboardData,
-  type DashboardSourceMode,
-  type DashboardViewData,
-} from "./dataResolution";
 
-interface DashboardClientProps {
-  initialData: DashboardViewData;
-  token: string;
-  initialSourceMode: DashboardSourceMode;
-  fallbackReason: string | null;
-  fallbackActivatedAt: number | null;
-  fallbackExpiresAt: number | null;
-  fallbackRetryMs: number;
-  initialLoadDurationMs: number;
+interface AccountData {
+  owner: string;
+  plan: string;
+  status: string;
+  dailyLimit: number;
+  usedToday: number;
+  tokenDisplay: string;
+  balance: number;
+  role: "user" | "admin" | string;
+  sessionSource: "local" | "cliproxy" | string;
 }
 
-const EMPTY_DASHBOARD_DATA = {
-  dailyUsage: [] as ReturnType<typeof MockDataService.getDailyUsage>,
-  modelBreakdown: [] as ReturnType<typeof MockDataService.getModelBreakdown>,
-  recentActivity: [] as ReturnType<typeof MockDataService.getRecentActivity>,
-  hourlyDistribution: [] as ReturnType<typeof MockDataService.getHourlyDistribution>,
-  stats: {
-    totalRequests: 0,
-    totalCost: 0,
-    promptTokens: 0,
-    completionTokens: 0,
-  },
-};
+interface DashboardClientProps {
+  accountData: AccountData;
+  token: string;
+}
 
 const LANGUAGE_STORAGE_KEY = "codexible_lang";
 
@@ -54,11 +52,8 @@ type DashboardCopy = {
   admin: string;
   logout: string;
   logoutAria: string;
-  fallbackTitle: string;
-  fallbackExpired: string;
-  fallbackRetrying: string;
-  fallbackUsing: string;
-  fallbackLastApiError: string;
+  loading: string;
+  retry: string;
   balance: string;
   credits: string;
   runway: string;
@@ -76,11 +71,8 @@ const DASHBOARD_COPY: Record<Lang, DashboardCopy> = {
     admin: "Admin Center",
     logout: "Log Out",
     logoutAria: "Log out",
-    fallbackTitle: "Dashboard is in degraded fallback mode.",
-    fallbackExpired: "Fallback window expired. Please refresh or log in again to force fresh API validation.",
-    fallbackRetrying: "Retrying API recovery...",
-    fallbackUsing: "Using bounded fallback data while the API recovers.",
-    fallbackLastApiError: "Last API error",
+    loading: "Loading dashboard data...",
+    retry: "Retry",
     balance: "Balance",
     credits: "credits",
     runway: "Runway",
@@ -96,11 +88,8 @@ const DASHBOARD_COPY: Record<Lang, DashboardCopy> = {
     admin: "Trung tâm Admin",
     logout: "Đăng xuất",
     logoutAria: "Đăng xuất",
-    fallbackTitle: "Dashboard đang ở chế độ dự phòng suy giảm.",
-    fallbackExpired: "Cửa sổ dự phòng đã hết hạn. Vui lòng tải lại hoặc đăng nhập lại để xác thực API mới.",
-    fallbackRetrying: "Đang thử khôi phục API...",
-    fallbackUsing: "Đang dùng dữ liệu dự phòng giới hạn trong khi API phục hồi.",
-    fallbackLastApiError: "Lỗi API gần nhất",
+    loading: "Đang tải dữ liệu...",
+    retry: "Thử lại",
     balance: "Số dư",
     credits: "tín dụng",
     runway: "Ước tính",
@@ -120,129 +109,77 @@ function getInitialDashboardLanguage(): Lang {
   return stored === "vi" || stored === "en" ? stored : "en";
 }
 
-export function DashboardClient({
-  initialData,
-  token,
-  initialSourceMode,
-  fallbackReason,
-  fallbackActivatedAt,
-  fallbackExpiresAt,
-  fallbackRetryMs,
-  initialLoadDurationMs,
-}: DashboardClientProps) {
+function todayString(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+export function DashboardClient({ accountData, token: tokenFromUrl }: DashboardClientProps) {
   const router = useRouter();
   const [dateRange, setDateRange] = useState<DateRangeOption>("7d");
-  const [accountData, setAccountData] = useState(initialData);
-  const [sourceMode, setSourceMode] = useState<DashboardSourceMode>(initialSourceMode);
-  const [fallbackExpired, setFallbackExpired] = useState(false);
-  const [retryInFlight, setRetryInFlight] = useState(false);
   const [lang, setLang] = useState<Lang>(getInitialDashboardLanguage);
+  // Token: prefer URL param (backward compat for direct links) else localStorage
+  const [token] = useState(
+    () => tokenFromUrl || (typeof window !== "undefined" ? localStorage.getItem("codexible_token") ?? "" : ""),
+  );
 
-  // Dynamically calculate mock data based on selected date range.
-  const daysMap = { "24h": 1, "7d": 7, "30d": 30, "all": 90 };
+  const daysMap: Record<DateRangeOption, number> = { "24h": 1, "7d": 7, "30d": 30, "all": 90 };
   const days = daysMap[dateRange];
-  const [isMounted, setIsMounted] = useState(false);
 
-  const dashboardData = useMemo(() => {
-    if (!isMounted) {
-      return EMPTY_DASHBOARD_DATA;
-    }
-
-    return {
-      dailyUsage: MockDataService.getDailyUsage(days),
-      modelBreakdown: MockDataService.getModelBreakdown(days),
-      recentActivity: MockDataService.getRecentActivity(Math.min(20, days * 5)),
-      hourlyDistribution: MockDataService.getHourlyDistribution(),
-      stats: MockDataService.getDashboardStats(days),
-    };
-  }, [days, isMounted]);
-
-  // Prevent hydration mismatch by only rendering generated chart data after mount.
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    console.info(
-      JSON.stringify({
-        event: "dashboard_initial_data_load",
-        mode: initialSourceMode,
-        degraded: initialSourceMode === "fallback",
-        duration_ms: initialLoadDurationMs,
-      }),
-    );
-  }, [initialLoadDurationMs, initialSourceMode]);
-
-  useEffect(() => {
-    if (sourceMode !== "fallback" || fallbackExpiresAt == null) {
-      return;
-    }
-
-    let cancelled = false;
-    let intervalId: ReturnType<typeof setInterval> | null = null;
-
-    const tryRecover = async () => {
-      if (Date.now() >= fallbackExpiresAt) {
-        if (!cancelled) {
-          setFallbackExpired(true);
-        }
-        return;
-      }
-
-      if (!cancelled) {
-        setRetryInFlight(true);
-      }
-
-      try {
-        const overview = await getDashboardOverview(token);
-        if (cancelled) {
-          return;
-        }
-
-        setAccountData(mapOverviewToDashboardData(overview));
-        setSourceMode("api");
-        setFallbackExpired(false);
-
-        console.info(
-          JSON.stringify({
-            event: "dashboard_fallback_recovery",
-            recovered: true,
-            fallback_activated_at: fallbackActivatedAt,
-            recovered_at: Date.now(),
-          }),
-        );
-
-        if (intervalId) {
-          clearInterval(intervalId);
-          intervalId = null;
-        }
-      } catch {
-        if (!cancelled && Date.now() >= fallbackExpiresAt) {
-          setFallbackExpired(true);
-        }
-      } finally {
-        if (!cancelled) {
-          setRetryInFlight(false);
-        }
-      }
-    };
-
-    void tryRecover();
-    intervalId = setInterval(() => {
-      void tryRecover();
-    }, fallbackRetryMs);
-
-    return () => {
-      cancelled = true;
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [fallbackActivatedAt, fallbackExpiresAt, fallbackRetryMs, sourceMode, token]);
+  const [dailyUsage, setDailyUsage] = useState<DailyUsage[]>([]);
+  const [modelBreakdown, setModelBreakdown] = useState<ModelBreakdown[]>([]);
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const [hourlyDistribution, setHourlyDistribution] = useState<HourlyDistribution[]>([]);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalRequests: 0,
+    totalCost: 0,
+    promptTokens: 0,
+    completionTokens: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
   }, [lang]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchData() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const [history, breakdown, activity, hourly, statsData] = await Promise.all([
+          getUsageHistory(token, days),
+          getModelBreakdown(token, days),
+          getUsageDetailed(token, days, Math.min(100, days * 5)),
+          getHourlyDistribution(token, todayString()),
+          getUsageStats(token, days),
+        ]);
+
+        if (cancelled) return;
+
+        setDailyUsage(history);
+        setModelBreakdown(breakdown);
+        setRecentActivity(activity);
+        setHourlyDistribution(hourly);
+        setStats(statsData);
+        setLoading(false);
+      } catch (err) {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : "Failed to load dashboard data.");
+        setLoading(false);
+      }
+    }
+
+    void fetchData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token, days]);
 
   const handleLogout = () => {
     localStorage.removeItem("api_keys");
@@ -258,7 +195,7 @@ export function DashboardClient({
         ? "var(--accent)"
         : "var(--red)";
 
-  const avgCostPerDay = dashboardData.stats.totalCost / days;
+  const avgCostPerDay = stats.totalCost > 0 && days > 0 ? stats.totalCost / days : 0;
   const runwayDays = avgCostPerDay > 0 ? Math.round(accountData.balance / avgCostPerDay) : 99;
 
   return (
@@ -273,7 +210,7 @@ export function DashboardClient({
           data-testid="dashboard-header-actions"
         >
           <a
-            href={`/dashboard/settings?token=${encodeURIComponent(token)}`}
+            href="/dashboard/settings"
             className="inline-flex h-8 items-center gap-2 rounded-lg px-3 text-sm font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
           >
             <Settings size={16} aria-hidden="true" />
@@ -281,7 +218,7 @@ export function DashboardClient({
           </a>
           {accountData.role === "admin" && (
             <a
-              href={`/dashboard/admin?token=${encodeURIComponent(token)}`}
+              href="/dashboard/admin"
               className="inline-flex h-8 items-center gap-2 rounded-lg px-3 text-sm font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
             >
               <Shield size={16} aria-hidden="true" />
@@ -301,24 +238,6 @@ export function DashboardClient({
           </button>
         </div>
       </div>
-
-      {sourceMode === "fallback" && (
-        <div className="mt-6 rounded-xl border border-[var(--accent)] bg-[var(--accent-light)] px-4 py-3 text-sm text-[var(--text-primary)]">
-          <p className="font-semibold">{t.fallbackTitle}</p>
-          <p className="mt-1 text-[var(--text-secondary)]">
-            {fallbackExpired
-              ? t.fallbackExpired
-              : retryInFlight
-                ? t.fallbackRetrying
-                : t.fallbackUsing}
-          </p>
-          {fallbackReason && (
-            <p className="mt-1 text-xs text-[var(--text-muted)]">
-              {t.fallbackLastApiError}: {fallbackReason}
-            </p>
-          )}
-        </div>
-      )}
 
       <div className="mt-8 grid gap-4 md:grid-cols-3">
         <div className="rounded-2xl border-2 bg-[var(--bg-primary)] p-5 shadow-sm" style={{ borderColor: balanceColor }}>
@@ -355,6 +274,43 @@ export function DashboardClient({
         <SubscriptionInfo plan={accountData.plan} dailyLimit={accountData.dailyLimit} />
       </div>
 
+      {error && (
+        <div className="mt-6 rounded-xl border border-[var(--red-light)] bg-[var(--red-light)] px-4 py-3 text-sm">
+          <p className="font-semibold text-[var(--red)]">Failed to load usage data</p>
+          <p className="mt-1 text-[var(--text-secondary)]">{error}</p>
+          <button
+            type="button"
+            onClick={() => {
+              setError(null);
+              setLoading(true);
+              void (async () => {
+                try {
+                  const [history, breakdown, activity, hourly, statsData] = await Promise.all([
+                    getUsageHistory(token, days),
+                    getModelBreakdown(token, days),
+                    getUsageDetailed(token, days, Math.min(100, days * 5)),
+                    getHourlyDistribution(token, todayString()),
+                    getUsageStats(token, days),
+                  ]);
+                  setDailyUsage(history);
+                  setModelBreakdown(breakdown);
+                  setRecentActivity(activity);
+                  setHourlyDistribution(hourly);
+                  setStats(statsData);
+                } catch (e) {
+                  setError(e instanceof Error ? e.message : "Failed to load.");
+                } finally {
+                  setLoading(false);
+                }
+              })();
+            }}
+            className="mt-2 rounded-md bg-[var(--accent)] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[var(--accent-dark)]"
+          >
+            {t.retry}
+          </button>
+        </div>
+      )}
+
       <section className="mt-8">
         <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-muted)]">
@@ -362,25 +318,52 @@ export function DashboardClient({
           </h2>
           <DateRangePicker value={dateRange} onChange={setDateRange} />
         </div>
-        <DashboardCharts
-          dailyUsage={dashboardData.dailyUsage}
-          modelBreakdown={dashboardData.modelBreakdown}
-        />
+        {loading ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="flex h-[248px] animate-pulse items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)]">
+              <span className="text-sm text-[var(--text-muted)]">{t.loading}</span>
+            </div>
+            <div className="flex h-[248px] animate-pulse items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)]">
+              <span className="text-sm text-[var(--text-muted)]">{t.loading}</span>
+            </div>
+          </div>
+        ) : (
+          <DashboardCharts
+            dailyUsage={dailyUsage}
+            modelBreakdown={modelBreakdown}
+          />
+        )}
       </section>
 
       <section className="mt-8">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[var(--text-muted)]">
           {t.usageInsights}
         </h2>
-        <InsightsGrid stats={dashboardData.stats} hourlyData={dashboardData.hourlyDistribution} />
+        {loading ? (
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-[100px] animate-pulse rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)]" />
+            ))}
+          </div>
+        ) : (
+          <InsightsGrid stats={stats} hourlyData={hourlyDistribution} />
+        )}
 
         <div className="mt-4">
-          <ActivityHeatmap data={dashboardData.hourlyDistribution} />
+          {loading ? (
+            <div className="h-[200px] animate-pulse rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)]" />
+          ) : (
+            <ActivityHeatmap data={hourlyDistribution} />
+          )}
         </div>
       </section>
 
       <section className="mt-8 grid gap-4 md:grid-cols-[2fr_1fr]">
-        <ActivityTable data={dashboardData.recentActivity} />
+        {loading ? (
+          <div className="h-[300px] animate-pulse rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)]" />
+        ) : (
+          <ActivityTable data={recentActivity} />
+        )}
         <div className="hidden md:block">
           <QuickActions token={token} />
         </div>

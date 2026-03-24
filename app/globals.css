@@ -196,9 +196,9 @@ samp,
 
 @keyframes rotate-words {
   0%, 20%  { transform: translateY(0); }
-  25%, 45% { transform: translateY(-1.2em); }
-  50%, 70% { transform: translateY(-2.4em); }
-  75%, 95% { transform: translateY(-3.6em); }
+  25%, 45% { transform: translateY(-1.15em); }
+  50%, 70% { transform: translateY(-2.3em); }
+  75%, 95% { transform: translateY(-3.45em); }
   100%     { transform: translateY(0); }
 }
 
