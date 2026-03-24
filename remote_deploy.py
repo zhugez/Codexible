@@ -107,6 +107,12 @@ def main():
     client.connect(HOST, port=PORT, username=USER, password=PASSWORD)
     print("Connected.\n")
 
+    # Pull latest code from GitHub before building
+    print("=" * 60)
+    print("Pulling latest code from GitHub...")
+    print("=" * 60)
+    run_command(client, f"cd {DEPLOY_DIR} && git pull origin main", timeout=60)
+
     # Step 1: Build backend Docker image
     if deploy_backend:
         print("=" * 60)
