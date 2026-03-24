@@ -456,6 +456,64 @@ export async function getAdminLogs(
   return json.logs ?? [];
 }
 
+// --- CliproxyAPI Management API (admin-only) ---
+
+export interface CliproxyApiKey {
+  value: string;
+  label?: string;
+  created_at?: string;
+  last_used_at?: string;
+  enabled?: boolean;
+}
+
+export async function getCliproxyApiKeys(token: string): Promise<CliproxyApiKey[]> {
+  const res = await request("/api/admin/cliproxy/api-keys", {
+    cache: "no-store",
+    headers: authHeaders(token),
+  });
+  await expectOk(res, "CliproxyAPI keys");
+  return res.json();
+}
+
+export async function deleteCliproxyApiKey(token: string, key: string): Promise<void> {
+  const res = await request(`/api/admin/cliproxy/api-keys/${encodeURIComponent(key)}`, {
+    method: "DELETE",
+    cache: "no-store",
+    headers: authHeaders(token),
+  });
+  await expectOk(res, "Delete CliproxyAPI key");
+}
+
+export async function addCliproxyApiKey(token: string, key: string): Promise<void> {
+  const res = await request("/api/admin/cliproxy/api-keys", {
+    method: "PATCH",
+    cache: "no-store",
+    headers: authHeaders(token, true),
+    body: JSON.stringify({ new: key }),
+  });
+  await expectOk(res, "Add CliproxyAPI key");
+}
+
+export async function syncCliproxyApiKeys(token: string, keys: string[]): Promise<{ synced: boolean; count: number }> {
+  const res = await request("/api/admin/cliproxy/api-keys", {
+    method: "PUT",
+    cache: "no-store",
+    headers: authHeaders(token, true),
+    body: JSON.stringify(keys),
+  });
+  await expectOk(res, "Sync CliproxyAPI keys");
+  return res.json();
+}
+
+export async function getCliproxyProxy(token: string, path: string): Promise<unknown> {
+  const res = await request(`/api/admin/cliproxy/proxy?path=${encodeURIComponent(path)}`, {
+    cache: "no-store",
+    headers: authHeaders(token),
+  });
+  await expectOk(res, "CliproxyAPI proxy");
+  return res.json();
+}
+
 // --- Usage API types and functions ---
 
 export interface DailyUsage {

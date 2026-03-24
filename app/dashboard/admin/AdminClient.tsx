@@ -160,6 +160,14 @@ export function AdminClient({ token: tokenFromUrl }: AdminClientProps) {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-[var(--text-primary)] md:text-4xl">Admin Center</h1>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <a
+              href={`/dashboard/admin/cliproxy?token=${token}`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-1.5 text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--border)]"
+            >
+              CliproxyAPI Keys
+            </a>
+          </div>
           <p className="mt-1 text-sm text-[var(--text-secondary)]">
             CPAMC-oriented management for users, tokens, integration status, and audit logs.
           </p>

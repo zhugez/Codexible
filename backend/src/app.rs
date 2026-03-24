@@ -40,6 +40,7 @@ pub fn create_router(pool: PgPool, redis: fred::clients::Client, config: Config)
         .merge(routes::keys::router())
         .merge(routes::usage::router())
         .merge(routes::admin::router())
+        .merge(routes::cliproxy_management::router())
         .merge(routes::proxy::router())
         .with_state(state.clone());
 
