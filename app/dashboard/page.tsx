@@ -4,10 +4,6 @@ import { DashboardClient } from "./DashboardClient";
 const CONNECTIVITY_ERROR_PATTERN =
   /cannot reach backend api|content security policy|connect-src|failed to fetch|network error/i;
 
-type DashboardPageProps = {
-  searchParams: Promise<{ token?: string }>;
-};
-
 function mapOverviewToAccountData(overview: DashboardOverview) {
   return {
     owner: overview.user.email,
@@ -15,16 +11,20 @@ function mapOverviewToAccountData(overview: DashboardOverview) {
     status: overview.user.status,
     dailyLimit: overview.usage.daily_limit,
     usedToday: overview.usage.credits_used,
-    tokenDisplay: `${overview.key.prefix}...`,
+    tokenDisplay: overview.key.prefix + "...",
     balance: overview.usage.daily_limit - overview.usage.credits_used,
     role: overview.role ?? "user",
     sessionSource: overview.session_source ?? "local",
   };
 }
 
-export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ token?: string }>;
+}) {
   const params = await searchParams;
-  const token = params.token ?? "";
+  const token = params.token ?? localStorage?.getItem("codexible_token") ?? "";
 
   if (!token) {
     return (
