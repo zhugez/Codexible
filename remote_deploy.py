@@ -168,6 +168,9 @@ def main():
         print("STEP 4: Restarting Frontend service...")
         print("=" * 60)
 
+        # Force recreate container with new image
+        run_command(client, "docker stop codexible-deploy-20260321-frontend-1 || true", timeout=30)
+        run_command(client, "docker rm codexible-deploy-20260321-frontend-1 || true", timeout=30)
         run_command(
             client,
             f"cd {DEPLOY_DIR} && docker compose up -d --no-deps frontend",
