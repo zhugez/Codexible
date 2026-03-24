@@ -10,8 +10,12 @@ interface SettingsClientProps {
     token: string;
 }
 
-export function SettingsClient({ token }: SettingsClientProps) {
+export function SettingsClient({ token: tokenFromUrl }: SettingsClientProps) {
     const [activeTab, setActiveTab] = useState<Tab>("profile");
+    // Prefer URL token (backward compat for direct links), fall back to localStorage
+    const [token] = useState(
+        () => tokenFromUrl || (typeof window !== "undefined" ? localStorage.getItem("codexible_token") ?? "" : ""),
+    );
 
     return (
         <div className="flex flex-col gap-8 md:flex-row md:items-start">

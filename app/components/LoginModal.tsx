@@ -61,7 +61,7 @@ export function LoginModal({ open, onClose, t }: LoginModalProps) {
         return;
       }
     } catch (error) {
-      if (isBackendConnectivityError(error)) {
+      if (error instanceof Error && isBackendConnectivityError(error)) {
         setError(error.message);
         return;
       }

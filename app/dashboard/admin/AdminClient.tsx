@@ -21,7 +21,11 @@ interface AdminClientProps {
   token: string;
 }
 
-export function AdminClient({ token }: AdminClientProps) {
+export function AdminClient({ token: tokenFromUrl }: AdminClientProps) {
+  // Prefer URL token (backward compat for direct links), fall back to localStorage
+  const [token] = useState(
+    () => tokenFromUrl || (typeof window !== "undefined" ? localStorage.getItem("codexible_token") ?? "" : ""),
+  );
   const [auth, setAuth] = useState<ValidateResponse | null>(null);
   const [status, setStatus] = useState<AdminStatus | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -161,7 +165,7 @@ export function AdminClient({ token }: AdminClientProps) {
           </p>
         </div>
         <a
-          href={`/dashboard?token=${encodeURIComponent(token)}`}
+          href="/dashboard"
           className="inline-flex h-9 items-center rounded-lg border border-[var(--border)] px-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
         >
           Back to Dashboard
