@@ -16,10 +16,7 @@ interface CliproxyClientProps {
   token: string;
 }
 
-export function CliproxyClient({ token: tokenFromUrl }: CliproxyClientProps) {
-  const [token, setToken] = useState(
-    () => tokenFromUrl || (typeof window !== "undefined" ? localStorage.getItem("codexible_token") ?? "" : ""),
-  );
+export function CliproxyClient({ token }: CliproxyClientProps) {
   const [auth, setAuth] = useState<ValidateResponse | null>(null);
   const [status, setStatus] = useState<AdminStatus | null>(null);
   const [keys, setKeys] = useState<CliproxyApiKey[]>([]);
